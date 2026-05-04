@@ -144,8 +144,7 @@ Commit and push the change.
 6. Confirm the page says the participant is in the challenge queue.
 7. Check the GitHub workflow:
    <https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml>
-8. Run the daily update workflow:
-   <https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml>
+8. When that workflow succeeds, the public leaderboard should refresh automatically. Telegram updates still run on the normal daily schedule.
 
 ## Important Notes
 

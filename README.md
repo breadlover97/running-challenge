@@ -87,8 +87,8 @@ Copy `config.example.json` to a private local `config.json` for local testing. D
    [Join with Strava](https://breadlover97.github.io/running-challenge/join.html)
 5. When they send you the one-time code and chosen team, open:
    [Add Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml)
-6. Click **Run workflow**, enter their display name, source label, team, and code, then run:
-   [Daily Mileage Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml)
+6. Click **Run workflow**, enter their display name, source label, team, and code.
+7. The workflow updates the participant config and refreshes the public leaderboard. Telegram updates still go out through the daily workflow.
 
 To change a participant's team later, open:
 [Update Participant Team](https://github.com/breadlover97/running-challenge/actions/workflows/update_team.yml)

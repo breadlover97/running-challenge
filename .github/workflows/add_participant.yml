@@ -34,6 +34,9 @@ on:
         default: false
         type: boolean
 
+permissions:
+  contents: write
+
 jobs:
   add-participant:
     runs-on: ubuntu-latest
@@ -86,5 +89,35 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
         run: gh secret set PARTICIPANT_CONFIG_JSON < "$RUNNER_TEMP/participant_config.updated.json"
 
+      - name: Fetch Strava activities with updated config
+        env:
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          GH_SECRETS_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
+        run: |
+          python scripts/fetch_strava.py \
+            --config "$RUNNER_TEMP/participant_config.updated.json" \
+            --output generated/activities.json \
+            --updated-config-output "$RUNNER_TEMP/participant_config.synced.json"
+          if [ -f "$RUNNER_TEMP/participant_config.synced.json" ]; then
+            GH_TOKEN="$GH_SECRETS_TOKEN" gh secret set PARTICIPANT_CONFIG_JSON < "$RUNNER_TEMP/participant_config.synced.json"
+            echo "Updated PARTICIPANT_CONFIG_JSON with rotated Strava refresh token(s)."
+          fi
+
+      - name: Build leaderboard JSON
+        run: python scripts/build_leaderboard.py --input generated/activities.json --output data/leaderboard.json
+
+      - name: Commit leaderboard update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/leaderboard.json
+          if git diff --cached --quiet; then
+            echo "No leaderboard changes to commit."
+          else
+            git commit -m "Update leaderboard after participant join"
+            git push
+          fi
+
       - name: Done
-        run: echo "Participant config updated. Run the Daily Mileage Challenge Update workflow to refresh the leaderboard and Telegram group."
+        run: echo "Participant config and public leaderboard updated."
