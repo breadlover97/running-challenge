@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>Mileage Challenge</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-copy">
+        <p class="eyebrow">Strava-first group challenge</p>
+        <h1 id="challengeName">Mileage Challenge</h1>
+        <p id="challengeDates" class="date-range">4 May 2026 to 31 December 2026</p>
+      </div>
+      <div class="track-visual" aria-hidden="true">
+        <div class="track-lane"></div>
+        <div class="track-marker">42</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="summary-grid" aria-label="Challenge summary">
+        <div class="summary-card">
+          <span class="summary-label">Total Distance</span>
+          <strong id="totalDistance">0.0 km</strong>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label">Runs Logged</span>
+          <strong id="totalRuns">0</strong>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label">Today</span>
+          <strong id="todayDistance">0.0 km</strong>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label">Last Updated</span>
+          <strong id="lastUpdated">Not synced yet</strong>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <h2>Leaderboard</h2>
+          <p id="syncStatus">Reading latest challenge data...</p>
+        </div>
+        <div class="table-wrap">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Runner</th>
+                <th>Distance</th>
+                <th>Today</th>
+                <th>Runs</th>
+                <th>Last Run</th>
+                <th>Source</th>
+                <th>Validation</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardBody"></tbody>
+          </table>
+        </div>
+        <div id="emptyState" class="empty-state" hidden>No runs have been logged for this challenge yet.</div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <h2>Activity Validation</h2>
+          <p>Recent Strava activity links for checking counted mileage.</p>
+        </div>
+        <div id="activityList" class="activity-list"></div>
+      </section>
+
+      <section class="info-section">
+        <h2>Data Source &amp; Validation</h2>
+        <p>
+          Data comes from the Strava API. Garmin and Apple Watch runs count after they sync into Strava.
+          Manual activities are excluded unless the organiser explicitly allows them for a participant.
+        </p>
+        <p>
+          This site shows mileage, run counts, source labels, and Strava validation links. It does not display GPS maps,
+          exact start or end locations, heart rate, cadence, power, or coordinates.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>Privacy-conscious mileage challenge dashboard</span>
+      <a href="https://www.strava.com/" target="_blank" rel="noreferrer">Powered by Strava data</a>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>

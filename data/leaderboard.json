@@ -1,0 +1,26 @@
+{
+  "challenge": {
+    "name": "Mileage Challenge",
+    "start_date": "2026-05-04",
+    "end_date": "2026-12-31",
+    "timezone": "Asia/Singapore",
+    "website_url": "https://YOUR_USERNAME.github.io/running-challenge/"
+  },
+  "generated_at": null,
+  "leaderboard": [],
+  "participants": {},
+  "daily_summary": {
+    "date": "2026-05-04",
+    "total_distance_km": 0.0,
+    "total_runs": 0,
+    "runners": [],
+    "biggest_mover": null
+  },
+  "validation_summary": {
+    "source": "Strava API",
+    "included_activities": 0,
+    "excluded_manual_activities": 0,
+    "excluded_non_run_activities": 0,
+    "errors": []
+  }
+}

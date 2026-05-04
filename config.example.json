@@ -1,0 +1,16 @@
+{
+  "challenge_name": "Mileage Challenge",
+  "challenge_start_date": "2026-05-04",
+  "challenge_end_date": "2026-12-31",
+  "timezone": "Asia/Singapore",
+  "website_url": "https://YOUR_USERNAME.github.io/running-challenge/",
+  "participants": [
+    {
+      "display_name": "Tai Zhi",
+      "strava_athlete_id": "123456",
+      "strava_refresh_token": "REFRESH_TOKEN_HERE",
+      "source_label": "Garmin \u2192 Strava",
+      "include_manual_activities": false
+    }
+  ]
+}
