@@ -6,13 +6,17 @@ This is the browser-only flow for adding friends to the mileage challenge.
 
 1. Open the challenge website:
    [https://breadlover97.github.io/running-challenge/](https://breadlover97.github.io/running-challenge/)
-2. Choose **Team A** or **Team B**.
-3. Tap **Join with Strava**.
-4. Log in to Strava.
-5. Approve access for the challenge app.
-6. You will return to the challenge website and see a one-time code.
-7. Tap **Copy Code**.
-8. Send the organiser these details privately:
+2. Tap **Sign in with Strava** in the top right corner.
+3. Log in to Strava.
+4. Approve access for the challenge app.
+5. After Strava sends you back, enter your display name and activity source.
+6. Choose **Team A** or **Team B**, then submit the join form.
+
+After the Cloudflare join flow is enabled, that is the whole process.
+
+Temporary manual flow:
+
+If the site still shows a one-time code, tap **Copy Details** and send the organiser these details privately:
    - one-time code
    - display name
    - chosen team
@@ -32,10 +36,8 @@ Do not post the code in the group chat. It can be used once and may expire quick
    - `strava_authorization_code`
    - leave `include_manual_activities` as `false` unless you are intentionally allowing manual entries
 4. Click **Run workflow**.
-5. After it succeeds, open:
-   [Daily Mileage Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml)
-6. Click **Run workflow** to refresh the leaderboard and send the Telegram update.
-7. Check the live site:
+5. After it succeeds, the public leaderboard refreshes automatically.
+6. Check the live site:
    [https://breadlover97.github.io/running-challenge/](https://breadlover97.github.io/running-challenge/)
 
 To change a participant's team after joining:
@@ -44,7 +46,7 @@ To change a participant's team after joining:
 2. Click **Run workflow**.
 3. Enter the participant's exact display name or Strava athlete ID.
 4. Pick **Team A** or **Team B**.
-5. Run [Daily Mileage Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml).
+5. Run [Daily Mileage Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml) to refresh public data.
 
 ## One-Time Setup Required
 

@@ -9,32 +9,16 @@
   </head>
   <body>
     <header class="site-header">
+      <nav class="top-nav" aria-label="Challenge actions">
+        <a class="site-mark" href="index.html">Mileage Challenge</a>
+        <div class="nav-actions">
+          <a id="joinStravaLink" class="primary-action compact-action strava-join-link" href="https://www.strava.com/oauth/authorize?client_id=235397&amp;redirect_uri=https%3A%2F%2Fbreadlover97.github.io%2Frunning-challenge%2F&amp;response_type=code&amp;approval_prompt=force&amp;scope=read,activity:read_all&amp;state=manual">Sign in with Strava</a>
+          <a class="secondary-action compact-action" href="index.html">Leaderboard</a>
+        </div>
+      </nav>
       <div class="header-copy">
         <h1>Join Mileage Challenge</h1>
         <p class="date-range">Participants only need to authorize Strava once.</p>
-        <div class="join-form" aria-label="Participant join details">
-          <label>
-            Display name
-            <input id="joinDisplayName" type="text" name="display_name" autocomplete="name" placeholder="Your name" required>
-          </label>
-          <label>
-            Activity source
-            <select id="joinSourceLabel" name="source_label">
-              <option>Garmin → Strava</option>
-              <option>Apple Watch → Strava</option>
-              <option>Strava App</option>
-            </select>
-          </label>
-        </div>
-        <div class="team-picker" aria-label="Choose team before joining">
-          <span>Join as</span>
-          <label><input type="radio" name="joinTeam" value="Team A" checked> Team A</label>
-          <label><input type="radio" name="joinTeam" value="Team B"> Team B</label>
-        </div>
-        <div class="header-actions">
-          <a id="joinStravaLink" class="primary-action strava-join-link" href="https://www.strava.com/oauth/authorize?client_id=235397&amp;redirect_uri=https%3A%2F%2Fbreadlover97.github.io%2Frunning-challenge%2F&amp;response_type=code&amp;approval_prompt=force&amp;scope=read,activity:read_all&amp;state=Team%20A">Join with Strava</a>
-          <a class="secondary-action" href="index.html">Back to leaderboard</a>
-        </div>
       </div>
     </header>
 
@@ -42,11 +26,11 @@
       <section class="info-section join-instructions">
         <h2>For Participants</h2>
         <ol>
-          <li>Enter your display name and activity source.</li>
-          <li>Choose <strong>Team A</strong> or <strong>Team B</strong>.</li>
-          <li>Tap <strong>Join with Strava</strong>.</li>
+          <li>Tap <strong>Sign in with Strava</strong> at the top right.</li>
           <li>Log in to Strava and approve access once.</li>
-          <li>After the Cloudflare join flow is enabled, you are done. No code copying is needed.</li>
+          <li>After Strava sends you back, enter your display name and activity source.</li>
+          <li>Choose <strong>Team A</strong> or <strong>Team B</strong>, then submit the join form.</li>
+          <li>You are done. No code copying is needed after the Cloudflare join flow is enabled.</li>
         </ol>
         <p>If the site still shows a one-time Strava code, the organiser has not switched on the automatic join flow yet.</p>
       </section>

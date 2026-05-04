@@ -3,7 +3,7 @@
 This turns participant onboarding into:
 
 ```text
-Challenge website -> Join with Strava -> Strava approval -> Cloudflare Worker -> GitHub Actions -> participant added
+Challenge website -> Sign in with Strava -> Strava approval -> choose team -> GitHub Actions -> participant added
 ```
 
 Participants will not need to copy a Strava code or send anything to the organiser.
@@ -137,10 +137,10 @@ Commit and push the change.
 ### 7. Test With One Participant
 
 1. Open <https://breadlover97.github.io/running-challenge/join.html>.
-2. Enter a display name.
-3. Choose activity source and team.
-4. Click **Join with Strava**.
-5. Approve access in Strava.
+2. Click **Sign in with Strava**.
+3. Approve access in Strava.
+4. Enter display name and activity source.
+5. Choose **Team A** or **Team B**, then submit the join form.
 6. Confirm the page says the participant is in the challenge queue.
 7. Check the GitHub workflow:
    <https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml>

@@ -25,6 +25,10 @@ export default {
         return handleStravaCallback(request, env);
       }
 
+      if (request.method === "POST" && url.pathname === "/complete") {
+        return completeJoin(request, env);
+      }
+
       return page("Page not found", "This join link is not valid.", env, 404);
     } catch (error) {
       console.error("Join Worker error:", safeError(error));
@@ -42,21 +46,8 @@ async function startStravaAuth(request, env) {
   requireEnv(env, ["STRAVA_CLIENT_ID", "STATE_SIGNING_SECRET"]);
 
   const url = new URL(request.url);
-  const displayName = cleanName(url.searchParams.get("display_name"));
-  const sourceLabel = cleanSourceLabel(url.searchParams.get("source_label"));
-  const team = cleanTeam(url.searchParams.get("team"));
-  const includeManualActivities = url.searchParams.get("include_manual_activities") === "true";
-
-  if (!displayName) {
-    return page("Name needed", "Please enter the name you want shown on the leaderboard.", env, 400);
-  }
-
   const state = await signState(
     {
-      display_name: displayName,
-      source_label: sourceLabel,
-      team,
-      include_manual_activities: includeManualActivities,
       issued_at: Math.floor(Date.now() / 1000)
     },
     env.STATE_SIGNING_SECRET
@@ -100,16 +91,93 @@ async function handleStravaCallback(request, env) {
     return page("Missing Strava response", "The Strava callback did not include the expected details.", env, 400);
   }
 
-  const participant = await verifyState(state, env.STATE_SIGNING_SECRET);
-  if (Math.floor(Date.now() / 1000) - participant.issued_at > MAX_STATE_AGE_SECONDS) {
-    return page("Join link expired", "Please return to the challenge page and tap Join with Strava again.", env, 400);
+  const authState = await verifyState(state, env.STATE_SIGNING_SECRET);
+  if (Math.floor(Date.now() / 1000) - authState.issued_at > MAX_STATE_AGE_SECONDS) {
+    return page("Join link expired", "Please return to the challenge page and tap Sign in with Strava again.", env, 400);
+  }
+
+  const joinTicket = await signState(
+    {
+      strava_authorization_code: code,
+      issued_at: Math.floor(Date.now() / 1000)
+    },
+    env.STATE_SIGNING_SECRET
+  );
+
+  return html(
+    `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Finish Joining</title>
+    ${style()}
+  </head>
+  <body>
+    <main class="card">
+      <p class="eyebrow">Strava connected</p>
+      <h1>Finish joining.</h1>
+      <p>Choose how your name and team should appear on the leaderboard.</p>
+      <form class="join-form" action="/complete" method="post">
+        <input type="hidden" name="join_ticket" value="${escapeHtml(joinTicket)}">
+        <label>
+          Display name
+          <input name="display_name" type="text" autocomplete="name" placeholder="Your name" required maxlength="80">
+        </label>
+        <label>
+          Activity source
+          <select name="source_label">
+            <option>Garmin → Strava</option>
+            <option>Apple Watch → Strava</option>
+            <option>Strava App</option>
+          </select>
+        </label>
+        <fieldset>
+          <legend>Join as</legend>
+          <label><input type="radio" name="team" value="Team A" required checked> Team A</label>
+          <label><input type="radio" name="team" value="Team B" required> Team B</label>
+        </fieldset>
+        <button class="button" type="submit">Join challenge</button>
+      </form>
+    </main>
+  </body>
+</html>`,
+    200
+  );
+}
+
+async function completeJoin(request, env) {
+  requireEnv(env, [
+    "GITHUB_WORKFLOW_TOKEN",
+    "STATE_SIGNING_SECRET",
+    "GITHUB_OWNER",
+    "GITHUB_REPO",
+    "GITHUB_REF",
+    "GITHUB_WORKFLOW_ID"
+  ]);
+
+  const form = await request.formData();
+  const ticket = await verifyJoinTicket(String(form.get("join_ticket") || ""), env.STATE_SIGNING_SECRET);
+  if (Math.floor(Date.now() / 1000) - ticket.issued_at > MAX_STATE_AGE_SECONDS) {
+    return page("Join form expired", "Please return to the challenge page and sign in with Strava again.", env, 400);
+  }
+
+  const participant = {
+    display_name: cleanName(form.get("display_name")),
+    source_label: cleanSourceLabel(form.get("source_label")),
+    team: cleanTeam(form.get("team")),
+    include_manual_activities: false
+  };
+
+  if (!participant.display_name) {
+    return page("Name needed", "Please enter the name you want shown on the leaderboard.", env, 400);
   }
 
   const workflow = await dispatchAddParticipantWorkflow(env, {
     display_name: participant.display_name,
     source_label: participant.source_label,
     team: participant.team,
-    strava_authorization_code: code,
+    strava_authorization_code: ticket.strava_authorization_code,
     include_manual_activities: String(Boolean(participant.include_manual_activities))
   });
 
@@ -189,14 +257,19 @@ async function verifyState(value, secret) {
   }
 
   const payload = JSON.parse(base64UrlDecode(encodedPayload));
-  payload.display_name = cleanName(payload.display_name);
-  payload.source_label = cleanSourceLabel(payload.source_label);
-  payload.team = cleanTeam(payload.team);
-  payload.include_manual_activities = Boolean(payload.include_manual_activities);
   payload.issued_at = Number(payload.issued_at || 0);
 
-  if (!payload.display_name || !payload.issued_at) {
+  if (!payload.issued_at) {
     throw new Error("State is incomplete");
+  }
+  return payload;
+}
+
+async function verifyJoinTicket(value, secret) {
+  const payload = await verifyState(value, secret);
+  payload.strava_authorization_code = String(payload.strava_authorization_code || "").trim();
+  if (!payload.strava_authorization_code) {
+    throw new Error("Join ticket is incomplete");
   }
   return payload;
 }
@@ -327,8 +400,15 @@ function style() {
     p { margin: 0 0 14px; color: var(--muted); font-weight: 650; }
     p strong { color: var(--ink); }
     .small { font-size: 0.92rem; }
+    .join-form { display: grid; gap: 14px; margin-top: 22px; }
+    .join-form label { display: grid; gap: 8px; color: var(--muted); font-size: 0.78rem; font-weight: 900; text-transform: uppercase; }
+    .join-form input[type="text"], .join-form select { min-height: 46px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; color: var(--ink); font: inherit; font-weight: 800; outline: none; }
+    fieldset { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 16px; }
+    legend { padding: 0 6px; color: var(--muted); font-size: 0.78rem; font-weight: 900; text-transform: uppercase; }
+    fieldset label { display: inline-flex; grid-auto-flow: column; align-items: center; min-height: 34px; padding: 7px 11px; border-radius: 999px; background: #fff; color: var(--ink); }
+    input[type="radio"] { accent-color: var(--orange); }
     a { color: var(--ink); font-weight: 900; text-decoration-color: var(--orange); text-decoration-thickness: 0.12em; text-underline-offset: 0.2em; }
-    .button { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; margin-top: 8px; padding: 12px 18px; border-radius: 999px; background: var(--orange); color: #fff; text-decoration: none; box-shadow: 0 12px 28px rgba(252, 76, 2, 0.24); }
+    .button { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; margin-top: 8px; padding: 12px 18px; border: 0; border-radius: 999px; background: var(--orange); color: #fff; font: inherit; font-weight: 900; text-decoration: none; box-shadow: 0 12px 28px rgba(252, 76, 2, 0.24); cursor: pointer; }
   </style>`;
 }
 

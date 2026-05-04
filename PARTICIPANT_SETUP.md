@@ -37,12 +37,18 @@ Each participant needs to authorize the organiser's Strava app once.
 Flow:
 
 1. Open the challenge website: [https://breadlover97.github.io/running-challenge/](https://breadlover97.github.io/running-challenge/)
-2. Tap **Join with Strava**.
+2. Tap **Sign in with Strava**.
 3. Log in to Strava.
 4. Approve access.
-5. Strava redirects you back to the challenge website.
-6. Tap **Copy Code**.
-7. Send the code privately to the organiser with your display name and activity source.
+5. Strava redirects you to the join page.
+6. Enter your display name and activity source.
+7. Choose **Team A** or **Team B**, then submit the join form.
+
+After the Cloudflare join flow is enabled, you do not need to copy or send a Strava code to the organiser.
+
+Temporary manual flow:
+
+If the site still shows a one-time Strava code, tap **Copy Details** and send the code privately to the organiser with your display name, activity source, and chosen team.
 
 Activity source options:
 
@@ -54,9 +60,9 @@ Organiser flow:
 
 1. Open [Add Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml).
 2. Click **Run workflow**.
-3. Enter the participant's display name, source label, and one-time code.
+3. Enter the participant's display name, source label, team, and one-time code.
 4. Click **Run workflow**.
-5. Run [Daily Mileage Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml).
+5. The workflow refreshes the public leaderboard. Telegram updates still go out through the daily workflow.
 
 Do not post authorization codes or tokens in the group chat.
 

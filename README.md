@@ -84,8 +84,8 @@ Copy `config.example.json` to a private local `config.json` for local testing. D
 2. Save the app's Client ID and Client Secret.
 3. Set the Authorization Callback Domain to `breadlover97.github.io`.
 4. Ask participants to use the website button:
-   [Join with Strava](https://breadlover97.github.io/running-challenge/join.html)
-5. When they send you the one-time code and chosen team, open:
+   [Sign in with Strava](https://breadlover97.github.io/running-challenge/join.html)
+5. In the temporary manual flow, when they send you the one-time code and chosen team, open:
    [Add Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml)
 6. Click **Run workflow**, enter their display name, source label, team, and code.
 7. The workflow updates the participant config and refreshes the public leaderboard. Telegram updates still go out through the daily workflow.
@@ -99,10 +99,10 @@ The repo includes a Cloudflare Worker in `cloudflare-worker/` that removes the m
 
 With the Worker enabled, participants:
 
-1. Enter display name, source, and team on the website.
-2. Tap **Join with Strava**.
-3. Approve Strava once.
-4. Return to a success page while GitHub Actions adds them automatically.
+1. Tap **Sign in with Strava**.
+2. Approve Strava once.
+3. Enter display name, source, and team on the follow-up join page.
+4. Submit once while GitHub Actions adds them automatically.
 
 Setup guide: [CLOUDFLARE_JOIN_SETUP.md](CLOUDFLARE_JOIN_SETUP.md)
 
