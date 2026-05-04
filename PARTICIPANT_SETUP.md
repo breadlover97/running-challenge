@@ -53,10 +53,9 @@ Flow:
 1. The organiser sends you the authorization link.
 2. You log in to Strava.
 3. You approve access.
-4. Strava redirects you to the redirect URI with a `code` in the URL.
-5. Send that code to the organiser, or let the organiser capture it through a simple local callback.
-6. The organiser exchanges the code for a refresh token using Strava's OAuth token endpoint.
-7. The organiser stores the refresh token securely in GitHub repository secrets.
+4. Strava redirects you back to the organiser's local helper page.
+5. The organiser's helper exchanges the one-time code for a refresh token.
+6. The organiser stores the refresh token securely in GitHub repository secrets.
 
 Do not post authorization codes or tokens in the group chat.
 

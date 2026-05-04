@@ -31,7 +31,8 @@ running-challenge/
 ├── scripts/
 │   ├── fetch_strava.py
 │   ├── build_leaderboard.py
-│   └── send_telegram.py
+│   ├── send_telegram.py
+│   └── strava_oauth_helper.py
 ├── .github/
 │   └── workflows/
 │       └── daily_update.yml
@@ -68,8 +69,21 @@ Copy `config.example.json` to a private local `config.json` for local testing. D
 
 1. Create a Strava API application from your Strava account.
 2. Save the app's Client ID and Client Secret.
-3. Set an Authorization Callback Domain that matches your redirect URI domain. For local setup, this is often `localhost`.
-4. Ask each participant to authorize the app once with this URL:
+3. Set the Authorization Callback Domain to `localhost` for the local helper. Strava also explicitly allows `127.0.0.1`.
+4. Use the local helper for each participant:
+
+```bash
+export STRAVA_CLIENT_ID="..."
+export STRAVA_CLIENT_SECRET="..."
+python scripts/strava_oauth_helper.py \
+  --display-name "Tai Zhi" \
+  --source-label "Garmin → Strava" \
+  --config config.json
+```
+
+The helper opens Strava in your browser, waits for the local redirect, exchanges the authorization code, prints the participant JSON, and appends or updates that participant in `config.json`.
+
+For a manual flow, ask each participant to authorize the app once with this URL:
 
 ```text
 https://www.strava.com/oauth/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&approval_prompt=force&scope=read,activity:read_all
@@ -153,6 +167,17 @@ Validate config without calling Strava:
 python scripts/fetch_strava.py --config config.json --dry-run
 python scripts/build_leaderboard.py
 python scripts/send_telegram.py --dry-run
+```
+
+Authorize and add a Strava participant locally:
+
+```bash
+export STRAVA_CLIENT_ID="..."
+export STRAVA_CLIENT_SECRET="..."
+python scripts/strava_oauth_helper.py \
+  --display-name "Tai Zhi" \
+  --source-label "Garmin → Strava" \
+  --config config.json
 ```
 
 Fetch real Strava data locally:
