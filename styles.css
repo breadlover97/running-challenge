@@ -101,9 +101,9 @@ p {
 }
 
 h1 {
-  max-width: 12ch;
+  max-width: 15ch;
   margin-bottom: 14px;
-  font-size: clamp(3rem, 8vw, 7.2rem);
+  font-size: clamp(2.5rem, 5.8vw, 5.2rem);
   font-weight: 900;
   letter-spacing: 0;
   line-height: 0.92;
@@ -182,8 +182,8 @@ h2 {
   position: relative;
   z-index: 1;
   aspect-ratio: 1;
-  min-height: 260px;
-  border: 18px solid var(--ink);
+  min-height: 230px;
+  border: 14px solid var(--ink);
   border-radius: 50%;
   background:
     conic-gradient(from -20deg, var(--orange) 0deg 58deg, transparent 58deg 360deg),
@@ -201,11 +201,11 @@ h2 {
 
 .track-visual::after {
   position: absolute;
-  left: 30%;
-  top: 18%;
-  width: 54px;
-  height: 54px;
-  border: 12px solid var(--orange);
+  left: 32%;
+  top: 20%;
+  width: 42px;
+  height: 42px;
+  border: 10px solid var(--orange);
   border-radius: 50%;
   background: #fff;
   content: "";
@@ -213,24 +213,24 @@ h2 {
 
 .track-lane {
   position: absolute;
-  inset: 74px;
-  border: 13px solid var(--soft);
+  inset: 66px;
+  border: 10px solid var(--soft);
   border-radius: 50%;
 }
 
 .track-marker {
   position: absolute;
-  right: 20px;
-  bottom: 48px;
+  right: 18px;
+  bottom: 42px;
   display: grid;
-  width: 74px;
-  height: 74px;
+  width: 62px;
+  height: 62px;
   place-items: center;
   border: 4px solid #fff;
   border-radius: 50%;
   background: var(--orange);
   color: white;
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   font-weight: 900;
   box-shadow: 0 14px 30px rgba(252, 76, 2, 0.35);
 }
@@ -597,7 +597,7 @@ main {
   }
 
   h1 {
-    font-size: clamp(3.15rem, 18vw, 5rem);
+    font-size: clamp(2.4rem, 13vw, 3.7rem);
   }
 
   .date-range {
