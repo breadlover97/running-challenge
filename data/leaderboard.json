@@ -4,13 +4,35 @@
     "start_date": "2026-05-04",
     "end_date": "2026-12-31",
     "timezone": "Asia/Singapore",
-    "website_url": "https://YOUR_USERNAME.github.io/running-challenge/"
+    "website_url": "https://breadlover97.github.io/running-challenge/"
   },
-  "generated_at": null,
-  "leaderboard": [],
-  "participants": {},
+  "generated_at": "2026-05-05T00:20:54+08:00",
+  "leaderboard": [
+    {
+      "rank": 1,
+      "rank_change": null,
+      "athlete_id": "17712235",
+      "display_name": "Ngim Tai Zhi",
+      "total_distance_km": 0.0,
+      "distance_added_today_km": 0.0,
+      "total_runs": 0,
+      "latest_activity_date": null,
+      "daily_distance_km": {},
+      "longest_run": null,
+      "source_label": "Strava App",
+      "last_synced_at": "2026-05-05T00:20:54+08:00",
+      "activities": []
+    }
+  ],
+  "participants": {
+    "17712235": {
+      "display_name": "Ngim Tai Zhi",
+      "source_label": "Strava App",
+      "activities": []
+    }
+  },
   "daily_summary": {
-    "date": "2026-05-04",
+    "date": "2026-05-05",
     "total_distance_km": 0.0,
     "total_runs": 0,
     "runners": [],
@@ -21,6 +43,13 @@
     "included_activities": 0,
     "excluded_manual_activities": 0,
     "excluded_non_run_activities": 0,
-    "errors": []
+    "excluded_out_of_range_activities": 0,
+    "errors": [],
+    "rotated_refresh_tokens": 0,
+    "privacy": [
+      "Only Run activities inside the challenge date range are counted.",
+      "Manual activities are excluded unless explicitly allowed.",
+      "GPS maps, coordinates, heart rate, cadence, and power are not stored or displayed."
+    ]
   }
 }
