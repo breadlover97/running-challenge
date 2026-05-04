@@ -2,6 +2,7 @@ const DATA_URL = "data/leaderboard.json";
 const STRAVA_CLIENT_ID = "235397";
 const STRAVA_REDIRECT_URI = "https://breadlover97.github.io/running-challenge/";
 const STRAVA_SCOPE = "read,activity:read_all";
+const JOIN_WORKER_START_URL = "";
 
 const formatDate = new Intl.DateTimeFormat("en-SG", {
   day: "numeric",
@@ -85,25 +86,55 @@ function teamState(value) {
   return teamName(value);
 }
 
+function joinDisplayName() {
+  return document.getElementById("joinDisplayName")?.value.trim() || "";
+}
+
+function joinSourceLabel() {
+  return document.getElementById("joinSourceLabel")?.value || "Strava App";
+}
+
 function setupJoinLinks() {
   const links = document.querySelectorAll(".strava-join-link");
   const radios = document.querySelectorAll('input[name="joinTeam"]');
+  const displayNameInput = document.getElementById("joinDisplayName");
+  const sourceSelect = document.getElementById("joinSourceLabel");
 
   function updateLinks() {
     const selected = document.querySelector('input[name="joinTeam"]:checked')?.value || "Team A";
-    const url = new URL("https://www.strava.com/oauth/authorize");
-    url.searchParams.set("client_id", STRAVA_CLIENT_ID);
-    url.searchParams.set("redirect_uri", STRAVA_REDIRECT_URI);
-    url.searchParams.set("response_type", "code");
-    url.searchParams.set("approval_prompt", "force");
-    url.searchParams.set("scope", STRAVA_SCOPE);
-    url.searchParams.set("state", teamState(selected));
+    const url = JOIN_WORKER_START_URL
+      ? new URL(JOIN_WORKER_START_URL)
+      : new URL("https://www.strava.com/oauth/authorize");
+
+    if (JOIN_WORKER_START_URL) {
+      url.searchParams.set("display_name", joinDisplayName());
+      url.searchParams.set("source_label", joinSourceLabel());
+      url.searchParams.set("team", teamName(selected));
+    } else {
+      url.searchParams.set("client_id", STRAVA_CLIENT_ID);
+      url.searchParams.set("redirect_uri", STRAVA_REDIRECT_URI);
+      url.searchParams.set("response_type", "code");
+      url.searchParams.set("approval_prompt", "force");
+      url.searchParams.set("scope", STRAVA_SCOPE);
+      url.searchParams.set("state", teamState(selected));
+    }
+
     links.forEach((link) => {
       link.href = url.toString();
     });
   }
 
   radios.forEach((radio) => radio.addEventListener("change", updateLinks));
+  displayNameInput?.addEventListener("input", updateLinks);
+  sourceSelect?.addEventListener("change", updateLinks);
+  links.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      if (!JOIN_WORKER_START_URL || joinDisplayName()) return;
+      event.preventDefault();
+      displayNameInput?.focus();
+      displayNameInput?.reportValidity();
+    });
+  });
   updateLinks();
 }
 
@@ -136,7 +167,7 @@ function renderJoinState() {
   title.textContent = "Strava authorization received";
   const selectedTeam = teamName(state);
   message.textContent =
-    `Copy these details and send them privately to the organiser with your display name and activity source. Selected team: ${selectedTeam}.`;
+    `Temporary manual flow: copy these details and send them privately to the organiser with your display name and activity source. Selected team: ${selectedTeam}.`;
   codeBox.textContent = code;
   copyButton.hidden = false;
   copyButton.addEventListener("click", async () => {

@@ -12,6 +12,20 @@
       <div class="header-copy">
         <h1 id="challengeName">Mileage Challenge</h1>
         <p id="challengeDates" class="date-range">4 May 2026 to 31 December 2026</p>
+        <div class="join-form" aria-label="Participant join details">
+          <label>
+            Display name
+            <input id="joinDisplayName" type="text" name="display_name" autocomplete="name" placeholder="Your name" required>
+          </label>
+          <label>
+            Activity source
+            <select id="joinSourceLabel" name="source_label">
+              <option>Garmin → Strava</option>
+              <option>Apple Watch → Strava</option>
+              <option>Strava App</option>
+            </select>
+          </label>
+        </div>
         <div class="team-picker" aria-label="Choose team before joining">
           <span>Join as</span>
           <label><input type="radio" name="joinTeam" value="Team A" checked> Team A</label>
@@ -64,9 +78,9 @@
       <section class="info-section join-instructions">
         <h2>Joining The Challenge</h2>
         <ol>
+          <li>Enter your display name and activity source.</li>
           <li>Choose <strong>Team A</strong> or <strong>Team B</strong>, then tap <strong>Join with Strava</strong>.</li>
-          <li>Copy the one-time code shown after Strava sends you back here.</li>
-          <li>Send the code privately to the organiser with your display name, activity source, and chosen team.</li>
+          <li>Approve the Strava permission screen once. After the Cloudflare join flow is enabled, no code copying is needed.</li>
         </ol>
       </section>
 

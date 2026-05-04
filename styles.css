@@ -120,6 +120,45 @@ h2 {
   margin-top: 18px;
 }
 
+.join-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 330px) minmax(220px, 300px);
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.join-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.join-form input,
+.join-form select {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.96rem;
+  font-weight: 800;
+  text-transform: none;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.join-form input:focus,
+.join-form select:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 4px rgba(252, 76, 2, 0.12);
+}
+
 .team-picker {
   display: inline-flex;
   flex-wrap: wrap;
@@ -660,6 +699,10 @@ main {
   .primary-action,
   .secondary-action {
     width: 100%;
+  }
+
+  .join-form {
+    grid-template-columns: 1fr;
   }
 
   .team-picker {

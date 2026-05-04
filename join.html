@@ -12,6 +12,20 @@
       <div class="header-copy">
         <h1>Join Mileage Challenge</h1>
         <p class="date-range">Participants only need to authorize Strava once.</p>
+        <div class="join-form" aria-label="Participant join details">
+          <label>
+            Display name
+            <input id="joinDisplayName" type="text" name="display_name" autocomplete="name" placeholder="Your name" required>
+          </label>
+          <label>
+            Activity source
+            <select id="joinSourceLabel" name="source_label">
+              <option>Garmin → Strava</option>
+              <option>Apple Watch → Strava</option>
+              <option>Strava App</option>
+            </select>
+          </label>
+        </div>
         <div class="team-picker" aria-label="Choose team before joining">
           <span>Join as</span>
           <label><input type="radio" name="joinTeam" value="Team A" checked> Team A</label>
@@ -28,23 +42,22 @@
       <section class="info-section join-instructions">
         <h2>For Participants</h2>
         <ol>
+          <li>Enter your display name and activity source.</li>
           <li>Choose <strong>Team A</strong> or <strong>Team B</strong>.</li>
           <li>Tap <strong>Join with Strava</strong>.</li>
-          <li>Log in to Strava and approve access.</li>
-          <li>When you return to the challenge site, tap <strong>Copy Code</strong>.</li>
-          <li>Send the code privately to the organiser with your display name, activity source, and chosen team.</li>
+          <li>Log in to Strava and approve access once.</li>
+          <li>After the Cloudflare join flow is enabled, you are done. No code copying is needed.</li>
         </ol>
-        <p>Choose one source label: <strong>Garmin → Strava</strong>, <strong>Apple Watch → Strava</strong>, or <strong>Strava App</strong>.</p>
+        <p>If the site still shows a one-time Strava code, the organiser has not switched on the automatic join flow yet.</p>
       </section>
 
       <section class="info-section join-instructions">
         <h2>For The Organiser</h2>
         <ol>
-          <li>Open <a href="https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml">Add Strava Participant</a>.</li>
-          <li>Click <strong>Run workflow</strong>.</li>
-          <li>Paste the participant's display name, source label, team, and one-time code.</li>
-          <li>Leave manual activities disabled unless you have agreed to allow them.</li>
-          <li>After it succeeds, run <a href="https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml">Daily Mileage Challenge Update</a>.</li>
+          <li>Create and deploy the Cloudflare Worker in <code>cloudflare-worker/</code>.</li>
+          <li>Update Strava's callback domain to the Worker domain.</li>
+          <li>Set <code>JOIN_WORKER_START_URL</code> in <code>app.js</code> to the Worker's <code>/start</code> URL.</li>
+          <li>Participants can then join directly from this page.</li>
         </ol>
       </section>
 

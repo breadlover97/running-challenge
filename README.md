@@ -41,8 +41,14 @@ running-challenge/
 │       ├── daily_update.yml
 │       ├── add_participant.yml
 │       └── update_team.yml
+├── cloudflare-worker/
+│   ├── src/
+│   │   └── index.js
+│   ├── package.json
+│   └── wrangler.jsonc
 ├── requirements.txt
 ├── README.md
+├── CLOUDFLARE_JOIN_SETUP.md
 ├── PARTICIPANT_SETUP.md
 └── config.example.json
 ```
@@ -86,6 +92,21 @@ Copy `config.example.json` to a private local `config.json` for local testing. D
 
 To change a participant's team later, open:
 [Update Participant Team](https://github.com/breadlover97/running-challenge/actions/workflows/update_team.yml)
+
+## One-Step Participant Join
+
+The repo includes a Cloudflare Worker in `cloudflare-worker/` that removes the manual copy-code step.
+
+With the Worker enabled, participants:
+
+1. Enter display name, source, and team on the website.
+2. Tap **Join with Strava**.
+3. Approve Strava once.
+4. Return to a success page while GitHub Actions adds them automatically.
+
+Setup guide: [CLOUDFLARE_JOIN_SETUP.md](CLOUDFLARE_JOIN_SETUP.md)
+
+The Worker only triggers the existing GitHub workflow. It does not store Strava refresh tokens or activity data.
 
 For local organiser testing, Strava also allows `localhost` and `127.0.0.1`. You can use the local helper:
 
