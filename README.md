@@ -24,6 +24,7 @@ The site is static HTML, CSS, and JavaScript, so it works well on GitHub Pages. 
 ```text
 running-challenge/
 ├── index.html
+├── join.html
 ├── styles.css
 ├── app.js
 ├── data/
@@ -32,10 +33,12 @@ running-challenge/
 │   ├── fetch_strava.py
 │   ├── build_leaderboard.py
 │   ├── send_telegram.py
-│   └── strava_oauth_helper.py
+│   ├── strava_oauth_helper.py
+│   └── add_participant_from_code.py
 ├── .github/
 │   └── workflows/
-│       └── daily_update.yml
+│       ├── daily_update.yml
+│       └── add_participant.yml
 ├── requirements.txt
 ├── README.md
 ├── PARTICIPANT_SETUP.md
@@ -69,8 +72,15 @@ Copy `config.example.json` to a private local `config.json` for local testing. D
 
 1. Create a Strava API application from your Strava account.
 2. Save the app's Client ID and Client Secret.
-3. Set the Authorization Callback Domain to `localhost` for the local helper. Strava also explicitly allows `127.0.0.1`.
-4. Use the local helper for each participant:
+3. Set the Authorization Callback Domain to `breadlover97.github.io`.
+4. Ask participants to use the website button:
+   [Join with Strava](https://breadlover97.github.io/running-challenge/join.html)
+5. When they send you the one-time code, open:
+   [Add Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml)
+6. Click **Run workflow**, enter their display name, source label, and code, then run:
+   [Daily Mileage Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml)
+
+For local organiser testing, Strava also allows `localhost` and `127.0.0.1`. You can use the local helper:
 
 ```bash
 export STRAVA_CLIENT_ID="..."
@@ -134,14 +144,11 @@ Add these repository secrets under GitHub repository settings:
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
 - `PARTICIPANT_CONFIG_JSON`
+- `GH_SECRETS_TOKEN`
 
 `PARTICIPANT_CONFIG_JSON` should be the full private config JSON, not `config.example.json`.
 
-Optional but strongly recommended:
-
-- `GH_SECRETS_TOKEN`
-
-Strava may rotate participant refresh tokens during a scheduled run. If `GH_SECRETS_TOKEN` is set, the workflow updates `PARTICIPANT_CONFIG_JSON` automatically with the rotated tokens. Use a GitHub token that can update Actions secrets for this repository, such as a fine-grained token with repository administration access or a classic token with the needed repo permissions. Without this, token rotation can require participants to re-authorize the app.
+`GH_SECRETS_TOKEN` lets GitHub Actions update `PARTICIPANT_CONFIG_JSON` when adding participants or when Strava rotates refresh tokens. Use a GitHub token that can update Actions secrets for this repository, such as a fine-grained token with repository administration access or a classic token with the needed repo permissions.
 
 ## GitHub Pages
 

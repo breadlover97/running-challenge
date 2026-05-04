@@ -74,6 +74,49 @@ function safeUrl(value) {
   return String(value);
 }
 
+function renderJoinState() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
+  const error = params.get("error");
+  const joinPanel = document.getElementById("joinPanel");
+  const title = document.getElementById("joinPanelTitle");
+  const message = document.getElementById("joinPanelMessage");
+  const codeBox = document.getElementById("stravaCode");
+  const copyButton = document.getElementById("copyCodeButton");
+
+  if (!joinPanel || (!code && !error)) {
+    return;
+  }
+
+  joinPanel.hidden = false;
+  joinPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  if (error) {
+    title.textContent = "Strava authorization was not completed";
+    message.textContent = "Please try again, or tell the organiser if you did not mean to cancel.";
+    codeBox.textContent = error;
+    copyButton.hidden = true;
+    return;
+  }
+
+  title.textContent = "Strava authorization received";
+  message.textContent =
+    "Copy this one-time code and send it privately to the organiser with your display name and activity source.";
+  codeBox.textContent = code;
+  copyButton.hidden = false;
+  copyButton.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      copyButton.textContent = "Copied";
+      window.setTimeout(() => {
+        copyButton.textContent = "Copy Code";
+      }, 1800);
+    } catch (clipboardError) {
+      copyButton.textContent = "Select code";
+    }
+  });
+}
+
 function renderSummary(data) {
   const leaderboard = data.leaderboard || [];
   const totalDistance = leaderboard.reduce((sum, runner) => sum + Number(runner.total_distance_km || 0), 0);
@@ -165,6 +208,8 @@ async function loadLeaderboard() {
   }
   return response.json();
 }
+
+renderJoinState();
 
 loadLeaderboard()
   .then((data) => {

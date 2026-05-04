@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>Join Mileage Challenge</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-copy">
+        <p class="eyebrow">One-time Strava setup</p>
+        <h1>Join Mileage Challenge</h1>
+        <p class="date-range">Participants only need to authorize Strava once.</p>
+        <div class="header-actions">
+          <a class="primary-action" href="https://www.strava.com/oauth/authorize?client_id=235397&amp;redirect_uri=https%3A%2F%2Fbreadlover97.github.io%2Frunning-challenge%2F&amp;response_type=code&amp;approval_prompt=force&amp;scope=read,activity:read_all&amp;state=mileage-challenge">Join with Strava</a>
+          <a class="secondary-action" href="index.html">Back to leaderboard</a>
+        </div>
+      </div>
+      <div class="track-visual" aria-hidden="true">
+        <div class="track-lane"></div>
+        <div class="track-marker">1x</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="info-section join-instructions">
+        <h2>For Participants</h2>
+        <ol>
+          <li>Open the challenge website and tap <strong>Join with Strava</strong>.</li>
+          <li>Log in to Strava and approve access.</li>
+          <li>When you return to the challenge site, tap <strong>Copy Code</strong>.</li>
+          <li>Send the code privately to the organiser with your display name and activity source.</li>
+        </ol>
+        <p>Choose one source label: <strong>Garmin → Strava</strong>, <strong>Apple Watch → Strava</strong>, or <strong>Strava App</strong>.</p>
+      </section>
+
+      <section class="info-section join-instructions">
+        <h2>For The Organiser</h2>
+        <ol>
+          <li>Open <a href="https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml">Add Strava Participant</a>.</li>
+          <li>Click <strong>Run workflow</strong>.</li>
+          <li>Paste the participant's display name, source label, and one-time code.</li>
+          <li>Leave manual activities disabled unless you have agreed to allow them.</li>
+          <li>After it succeeds, run <a href="https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml">Daily Mileage Challenge Update</a>.</li>
+        </ol>
+      </section>
+
+      <section class="info-section">
+        <h2>Privacy Note</h2>
+        <p>
+          This setup links Strava to the challenge leaderboard. GPS maps, exact start and end locations,
+          heart rate, cadence, power, and coordinates are not displayed.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

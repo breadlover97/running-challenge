@@ -30,6 +30,51 @@ a {
   text-underline-offset: 0.18em;
 }
 
+button,
+.primary-action,
+.secondary-action {
+  font: inherit;
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.primary-action,
+.secondary-action,
+.code-card button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 15px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.primary-action {
+  background: var(--orange);
+  color: #fff;
+}
+
+.secondary-action {
+  border-color: var(--line);
+  background: #fff;
+  color: var(--green);
+}
+
+.code-card button {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+  cursor: pointer;
+}
+
 .site-header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 220px;
@@ -147,6 +192,55 @@ main {
 .info-section {
   margin-top: 18px;
   padding: 22px;
+}
+
+.join-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 22px;
+  border: 2px solid rgba(23, 107, 77, 0.28);
+  border-radius: 8px;
+  background: #eef8f2;
+  box-shadow: var(--shadow);
+}
+
+.join-panel[hidden] {
+  display: none;
+}
+
+.join-panel p {
+  margin-bottom: 0;
+}
+
+.code-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.code-card code {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+
+.join-instructions ol {
+  margin: 12px 0 0;
+  padding-left: 22px;
+}
+
+.join-instructions li + li {
+  margin-top: 6px;
 }
 
 .section-heading {
@@ -335,6 +429,10 @@ main {
   .section-heading p {
     text-align: left;
   }
+
+  .join-panel {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 620px) {
@@ -395,6 +493,10 @@ main {
   .activity-row {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+
+  .code-card {
+    grid-template-columns: 1fr;
   }
 
   .activity-title {

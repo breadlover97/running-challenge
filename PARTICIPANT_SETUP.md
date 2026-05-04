@@ -34,28 +34,29 @@ Only runs inside the challenge period, 4 May 2026 to 31 December 2026, are count
 
 Each participant needs to authorize the organiser's Strava app once.
 
-The organiser will create an authorization link using:
-
-- `STRAVA_CLIENT_ID`
-- `redirect_uri`
-- `response_type=code`
-- `approval_prompt=force`
-- `scope=read,activity:read_all`
-
-Authorization URL format:
-
-```text
-https://www.strava.com/oauth/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&approval_prompt=force&scope=read,activity:read_all
-```
-
 Flow:
 
-1. The organiser sends you the authorization link.
-2. You log in to Strava.
-3. You approve access.
-4. Strava redirects you back to the organiser's local helper page.
-5. The organiser's helper exchanges the one-time code for a refresh token.
-6. The organiser stores the refresh token securely in GitHub repository secrets.
+1. Open the challenge website: [https://breadlover97.github.io/running-challenge/](https://breadlover97.github.io/running-challenge/)
+2. Tap **Join with Strava**.
+3. Log in to Strava.
+4. Approve access.
+5. Strava redirects you back to the challenge website.
+6. Tap **Copy Code**.
+7. Send the code privately to the organiser with your display name and activity source.
+
+Activity source options:
+
+- `Garmin → Strava`
+- `Apple Watch → Strava`
+- `Strava App`
+
+Organiser flow:
+
+1. Open [Add Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml).
+2. Click **Run workflow**.
+3. Enter the participant's display name, source label, and one-time code.
+4. Click **Run workflow**.
+5. Run [Daily Mileage Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml).
 
 Do not post authorization codes or tokens in the group chat.
 

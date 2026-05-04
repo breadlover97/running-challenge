@@ -1,0 +1,81 @@
+name: Add Strava Participant
+
+on:
+  workflow_dispatch:
+    inputs:
+      display_name:
+        description: "Name to show on the leaderboard"
+        required: true
+        type: string
+      source_label:
+        description: "Activity source label"
+        required: true
+        default: "Strava App"
+        type: choice
+        options:
+          - "Garmin → Strava"
+          - "Apple Watch → Strava"
+          - "Strava App"
+      strava_authorization_code:
+        description: "One-time code copied from the Join Challenge page"
+        required: true
+        type: string
+      include_manual_activities:
+        description: "Count manual Strava activities for this participant"
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  add-participant:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate setup secrets
+        env:
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          PARTICIPANT_CONFIG_JSON: ${{ secrets.PARTICIPANT_CONFIG_JSON }}
+          GH_SECRETS_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
+        run: |
+          test -n "$STRAVA_CLIENT_ID" || (echo "Missing STRAVA_CLIENT_ID" && exit 1)
+          test -n "$STRAVA_CLIENT_SECRET" || (echo "Missing STRAVA_CLIENT_SECRET" && exit 1)
+          test -n "$PARTICIPANT_CONFIG_JSON" || (echo "Missing PARTICIPANT_CONFIG_JSON" && exit 1)
+          test -n "$GH_SECRETS_TOKEN" || (echo "Missing GH_SECRETS_TOKEN. Add it once so this workflow can update PARTICIPANT_CONFIG_JSON." && exit 1)
+
+      - name: Exchange code and update config
+        env:
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          PARTICIPANT_CONFIG_JSON: ${{ secrets.PARTICIPANT_CONFIG_JSON }}
+        run: |
+          args=(
+            --code "${{ inputs.strava_authorization_code }}"
+            --display-name "${{ inputs.display_name }}"
+            --source-label "${{ inputs.source_label }}"
+            --output "$RUNNER_TEMP/participant_config.updated.json"
+          )
+          if [ "${{ inputs.include_manual_activities }}" = "true" ]; then
+            args+=(--include-manual-activities)
+          fi
+          python scripts/add_participant_from_code.py "${args[@]}"
+
+      - name: Save updated participant config secret
+        env:
+          GH_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
+        run: gh secret set PARTICIPANT_CONFIG_JSON < "$RUNNER_TEMP/participant_config.updated.json"
+
+      - name: Done
+        run: echo "Participant config updated. Run the Daily Mileage Challenge Update workflow to refresh the leaderboard and Telegram group."
