@@ -75,7 +75,7 @@ Copy `config.example.json` to a private local `config.json` for local testing. D
 ```bash
 export STRAVA_CLIENT_ID="..."
 export STRAVA_CLIENT_SECRET="..."
-python scripts/strava_oauth_helper.py \
+python3 scripts/strava_oauth_helper.py \
   --display-name "Tai Zhi" \
   --source-label "Garmin → Strava" \
   --config config.json
@@ -164,9 +164,9 @@ pip install -r requirements.txt
 Validate config without calling Strava:
 
 ```bash
-python scripts/fetch_strava.py --config config.json --dry-run
-python scripts/build_leaderboard.py
-python scripts/send_telegram.py --dry-run
+python3 scripts/fetch_strava.py --config config.json --dry-run
+python3 scripts/build_leaderboard.py
+python3 scripts/send_telegram.py --dry-run
 ```
 
 Authorize and add a Strava participant locally:
@@ -174,7 +174,7 @@ Authorize and add a Strava participant locally:
 ```bash
 export STRAVA_CLIENT_ID="..."
 export STRAVA_CLIENT_SECRET="..."
-python scripts/strava_oauth_helper.py \
+python3 scripts/strava_oauth_helper.py \
   --display-name "Tai Zhi" \
   --source-label "Garmin → Strava" \
   --config config.json
@@ -185,8 +185,8 @@ Fetch real Strava data locally:
 ```bash
 export STRAVA_CLIENT_ID="..."
 export STRAVA_CLIENT_SECRET="..."
-python scripts/fetch_strava.py --config config.json
-python scripts/build_leaderboard.py
+python3 scripts/fetch_strava.py --config config.json
+python3 scripts/build_leaderboard.py
 ```
 
 Preview the site locally:
@@ -202,7 +202,7 @@ Send a Telegram test:
 ```bash
 export TELEGRAM_BOT_TOKEN="..."
 export TELEGRAM_CHAT_ID="..."
-python scripts/send_telegram.py
+python3 scripts/send_telegram.py
 ```
 
 ## Privacy Notes
