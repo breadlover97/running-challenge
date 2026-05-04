@@ -12,32 +12,36 @@
       <div class="header-copy">
         <h1 id="challengeName">Mileage Challenge</h1>
         <p id="challengeDates" class="date-range">4 May 2026 to 31 December 2026</p>
+        <div class="team-picker" aria-label="Choose team before joining">
+          <span>Join as</span>
+          <label><input type="radio" name="joinTeam" value="Team A" checked> Team A</label>
+          <label><input type="radio" name="joinTeam" value="Team B"> Team B</label>
+        </div>
         <div class="header-actions">
-          <a id="joinStravaLink" class="primary-action" href="https://www.strava.com/oauth/authorize?client_id=235397&amp;redirect_uri=https%3A%2F%2Fbreadlover97.github.io%2Frunning-challenge%2F&amp;response_type=code&amp;approval_prompt=force&amp;scope=read,activity:read_all&amp;state=mileage-challenge">Join with Strava</a>
+          <a id="joinStravaLink" class="primary-action strava-join-link" href="https://www.strava.com/oauth/authorize?client_id=235397&amp;redirect_uri=https%3A%2F%2Fbreadlover97.github.io%2Frunning-challenge%2F&amp;response_type=code&amp;approval_prompt=force&amp;scope=read,activity:read_all&amp;state=Team%20A">Join with Strava</a>
           <a class="secondary-action" href="join.html">Setup steps</a>
         </div>
-      </div>
-      <div class="track-visual" aria-hidden="true">
-        <div class="track-lane"></div>
-        <div class="track-marker">KM</div>
       </div>
     </header>
 
     <main>
-      <section class="summary-grid" aria-label="Challenge summary">
-        <div class="summary-card">
-          <span class="summary-label">Total Distance</span>
-          <strong id="totalDistance">0.0 km</strong>
+      <section id="teamSummary" class="team-summary" aria-label="Team totals">
+        <div class="team-card team-a">
+          <span class="summary-label">Team A</span>
+          <strong id="teamADistance">0.0 km</strong>
+          <span id="teamAMeta">0 runners</span>
         </div>
-        <div class="summary-card">
+        <div class="team-card team-b">
+          <span class="summary-label">Team B</span>
+          <strong id="teamBDistance">0.0 km</strong>
+          <span id="teamBMeta">0 runners</span>
+        </div>
+        <div class="team-card compact">
           <span class="summary-label">Runs Logged</span>
           <strong id="totalRuns">0</strong>
+          <span id="todayDistance">0.0 km today</span>
         </div>
-        <div class="summary-card">
-          <span class="summary-label">Today</span>
-          <strong id="todayDistance">0.0 km</strong>
-        </div>
-        <div class="summary-card">
+        <div class="team-card compact">
           <span class="summary-label">Last Updated</span>
           <strong id="lastUpdated">Not synced yet</strong>
         </div>
@@ -53,17 +57,25 @@
         </div>
         <div class="code-card">
           <code id="stravaCode">Waiting for Strava...</code>
-          <button id="copyCodeButton" type="button">Copy Code</button>
+          <button id="copyCodeButton" type="button">Copy Details</button>
         </div>
       </section>
 
       <section class="info-section join-instructions">
         <h2>Joining The Challenge</h2>
         <ol>
-          <li>Tap <strong>Join with Strava</strong> and approve access once.</li>
+          <li>Choose <strong>Team A</strong> or <strong>Team B</strong>, then tap <strong>Join with Strava</strong>.</li>
           <li>Copy the one-time code shown after Strava sends you back here.</li>
-          <li>Send the code privately to the organiser with your display name and activity source.</li>
+          <li>Send the code privately to the organiser with your display name, activity source, and chosen team.</li>
         </ol>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <h2>Team Contributions</h2>
+          <p>Each runner's share of their team's total distance.</p>
+        </div>
+        <div id="teamBreakdown" class="team-breakdown"></div>
       </section>
 
       <section class="panel">
@@ -77,6 +89,7 @@
               <tr>
                 <th>Rank</th>
                 <th>Runner</th>
+                <th>Team</th>
                 <th>Distance</th>
                 <th>Today</th>
                 <th>Runs</th>

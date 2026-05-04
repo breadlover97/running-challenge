@@ -82,6 +82,7 @@ def main() -> int:
     parser.add_argument("--code", required=True, help="One-time Strava authorization code")
     parser.add_argument("--display-name", required=True, help="Leaderboard display name")
     parser.add_argument("--source-label", default="Strava App", help='Example: "Garmin → Strava"')
+    parser.add_argument("--team", choices=["Team A", "Team B"], default="Team A")
     parser.add_argument("--include-manual-activities", action="store_true")
     parser.add_argument("--output", required=True, help="Updated participant config output path")
     args = parser.parse_args()
@@ -98,6 +99,7 @@ def main() -> int:
             "display_name": display_name_from_payload(token_payload, args.display_name),
             "strava_athlete_id": athlete_id,
             "strava_refresh_token": token_payload["refresh_token"],
+            "team": args.team,
             "source_label": args.source_label.strip() or "Strava App",
             "include_manual_activities": bool(args.include_manual_activities),
         }

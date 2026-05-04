@@ -34,11 +34,13 @@ running-challenge/
 │   ├── build_leaderboard.py
 │   ├── send_telegram.py
 │   ├── strava_oauth_helper.py
-│   └── add_participant_from_code.py
+│   ├── add_participant_from_code.py
+│   └── update_participant_team.py
 ├── .github/
 │   └── workflows/
 │       ├── daily_update.yml
-│       └── add_participant.yml
+│       ├── add_participant.yml
+│       └── update_team.yml
 ├── requirements.txt
 ├── README.md
 ├── PARTICIPANT_SETUP.md
@@ -56,11 +58,13 @@ Copy `config.example.json` to a private local `config.json` for local testing. D
   "challenge_end_date": "2026-12-31",
   "timezone": "Asia/Singapore",
   "website_url": "https://YOUR_USERNAME.github.io/running-challenge/",
+  "teams": ["Team A", "Team B"],
   "participants": [
     {
       "display_name": "Tai Zhi",
       "strava_athlete_id": "123456",
       "strava_refresh_token": "REFRESH_TOKEN_HERE",
+      "team": "Team A",
       "source_label": "Garmin → Strava",
       "include_manual_activities": false
     }
@@ -75,10 +79,13 @@ Copy `config.example.json` to a private local `config.json` for local testing. D
 3. Set the Authorization Callback Domain to `breadlover97.github.io`.
 4. Ask participants to use the website button:
    [Join with Strava](https://breadlover97.github.io/running-challenge/join.html)
-5. When they send you the one-time code, open:
+5. When they send you the one-time code and chosen team, open:
    [Add Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml)
-6. Click **Run workflow**, enter their display name, source label, and code, then run:
+6. Click **Run workflow**, enter their display name, source label, team, and code, then run:
    [Daily Mileage Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml)
+
+To change a participant's team later, open:
+[Update Participant Team](https://github.com/breadlover97/running-challenge/actions/workflows/update_team.yml)
 
 For local organiser testing, Strava also allows `localhost` and `127.0.0.1`. You can use the local helper:
 

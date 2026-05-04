@@ -1,0 +1,54 @@
+name: Update Participant Team
+
+on:
+  workflow_dispatch:
+    inputs:
+      participant:
+        description: "Exact display name or Strava athlete ID"
+        required: true
+        type: string
+      team:
+        description: "New team assignment"
+        required: true
+        type: choice
+        options:
+          - "Team A"
+          - "Team B"
+
+jobs:
+  update-team:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate setup secrets
+        env:
+          PARTICIPANT_CONFIG_JSON: ${{ secrets.PARTICIPANT_CONFIG_JSON }}
+          GH_SECRETS_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
+        run: |
+          test -n "$PARTICIPANT_CONFIG_JSON" || (echo "Missing PARTICIPANT_CONFIG_JSON" && exit 1)
+          test -n "$GH_SECRETS_TOKEN" || (echo "Missing GH_SECRETS_TOKEN" && exit 1)
+
+      - name: Update participant team
+        env:
+          PARTICIPANT_CONFIG_JSON: ${{ secrets.PARTICIPANT_CONFIG_JSON }}
+        run: |
+          python scripts/update_participant_team.py \
+            --participant "${{ inputs.participant }}" \
+            --team "${{ inputs.team }}" \
+            --output "$RUNNER_TEMP/participant_config.updated.json"
+
+      - name: Save updated participant config secret
+        env:
+          GH_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
+        run: gh secret set PARTICIPANT_CONFIG_JSON < "$RUNNER_TEMP/participant_config.updated.json"
+
+      - name: Done
+        run: echo "Team updated. Run the Daily Mileage Challenge Update workflow to refresh the public leaderboard."

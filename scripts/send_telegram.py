@@ -60,13 +60,27 @@ def build_message(data: dict[str, Any]) -> str:
         f"🏃 <b>{e(challenge.get('name', 'Mileage Challenge'))} Daily Update</b>",
         f"Date: {e(format_date(daily.get('date')))}",
         "",
-        "<b>Leaderboard:</b>",
+        "<b>Team totals:</b>",
     ]
+
+    team_summary = data.get("team_summary", {})
+    for team_name in ("Team A", "Team B"):
+        team = team_summary.get(team_name, {})
+        lines.append(
+            f"{e(team_name)} - {fmt_km(team.get('total_distance_km'))} "
+            f"({int(team.get('participant_count') or 0)} runners)"
+        )
+
+    lines.extend([
+        "",
+        "<b>Leaderboard:</b>",
+    ])
 
     if leaderboard:
         for row in leaderboard[:MAX_LEADERBOARD_ROWS]:
             lines.append(
-                f"{row.get('rank')}. {e(row.get('display_name', 'Runner'))} - "
+                f"{row.get('rank')}. {e(row.get('display_name', 'Runner'))} "
+                f"({e(row.get('team', 'Team A'))}) - "
                 f"{fmt_km(row.get('total_distance_km'))} "
                 f"(+{fmt_km(row.get('distance_added_today_km'))} today)"
             )

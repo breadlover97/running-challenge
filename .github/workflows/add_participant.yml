@@ -16,6 +16,14 @@ on:
           - "Garmin → Strava"
           - "Apple Watch → Strava"
           - "Strava App"
+      team:
+        description: "Team assignment"
+        required: true
+        default: "Team A"
+        type: choice
+        options:
+          - "Team A"
+          - "Team B"
       strava_authorization_code:
         description: "One-time code copied from the Join Challenge page"
         required: true
@@ -65,6 +73,7 @@ jobs:
             --code "${{ inputs.strava_authorization_code }}"
             --display-name "${{ inputs.display_name }}"
             --source-label "${{ inputs.source_label }}"
+            --team "${{ inputs.team }}"
             --output "$RUNNER_TEMP/participant_config.updated.json"
           )
           if [ "${{ inputs.include_manual_activities }}" = "true" ]; then

@@ -1,4 +1,7 @@
 const DATA_URL = "data/leaderboard.json";
+const STRAVA_CLIENT_ID = "235397";
+const STRAVA_REDIRECT_URI = "https://breadlover97.github.io/running-challenge/";
+const STRAVA_SCOPE = "read,activity:read_all";
 
 const formatDate = new Intl.DateTimeFormat("en-SG", {
   day: "numeric",
@@ -74,9 +77,40 @@ function safeUrl(value) {
   return String(value);
 }
 
+function teamName(value) {
+  return value === "Team B" ? "Team B" : "Team A";
+}
+
+function teamState(value) {
+  return teamName(value);
+}
+
+function setupJoinLinks() {
+  const links = document.querySelectorAll(".strava-join-link");
+  const radios = document.querySelectorAll('input[name="joinTeam"]');
+
+  function updateLinks() {
+    const selected = document.querySelector('input[name="joinTeam"]:checked')?.value || "Team A";
+    const url = new URL("https://www.strava.com/oauth/authorize");
+    url.searchParams.set("client_id", STRAVA_CLIENT_ID);
+    url.searchParams.set("redirect_uri", STRAVA_REDIRECT_URI);
+    url.searchParams.set("response_type", "code");
+    url.searchParams.set("approval_prompt", "force");
+    url.searchParams.set("scope", STRAVA_SCOPE);
+    url.searchParams.set("state", teamState(selected));
+    links.forEach((link) => {
+      link.href = url.toString();
+    });
+  }
+
+  radios.forEach((radio) => radio.addEventListener("change", updateLinks));
+  updateLinks();
+}
+
 function renderJoinState() {
   const params = new URLSearchParams(window.location.search);
   const code = params.get("code");
+  const state = params.get("state");
   const error = params.get("error");
   const joinPanel = document.getElementById("joinPanel");
   const title = document.getElementById("joinPanelTitle");
@@ -100,16 +134,17 @@ function renderJoinState() {
   }
 
   title.textContent = "Strava authorization received";
+  const selectedTeam = teamName(state);
   message.textContent =
-    "Copy this one-time code and send it privately to the organiser with your display name and activity source.";
+    `Copy these details and send them privately to the organiser with your display name and activity source. Selected team: ${selectedTeam}.`;
   codeBox.textContent = code;
   copyButton.hidden = false;
   copyButton.addEventListener("click", async () => {
     try {
-      await navigator.clipboard.writeText(code);
+      await navigator.clipboard.writeText(`Strava code: ${code}\nTeam: ${selectedTeam}`);
       copyButton.textContent = "Copied";
       window.setTimeout(() => {
-        copyButton.textContent = "Copy Code";
+        copyButton.textContent = "Copy Details";
       }, 1800);
     } catch (clipboardError) {
       copyButton.textContent = "Select code";
@@ -119,17 +154,63 @@ function renderJoinState() {
 
 function renderSummary(data) {
   const leaderboard = data.leaderboard || [];
-  const totalDistance = leaderboard.reduce((sum, runner) => sum + Number(runner.total_distance_km || 0), 0);
   const totalRuns = leaderboard.reduce((sum, runner) => sum + Number(runner.total_runs || 0), 0);
   const todayDistance = Number(data.daily_summary?.total_distance_km || 0);
+  const teamSummary = data.team_summary || {};
+  const teamA = teamSummary["Team A"] || {};
+  const teamB = teamSummary["Team B"] || {};
 
   document.getElementById("challengeName").textContent = data.challenge?.name || "Mileage Challenge";
   document.getElementById("challengeDates").textContent =
     `${prettyDate(data.challenge?.start_date)} to ${prettyDate(data.challenge?.end_date)}`;
-  document.getElementById("totalDistance").textContent = km(totalDistance);
+  document.getElementById("teamADistance").textContent = km(teamA.total_distance_km);
+  document.getElementById("teamAMeta").textContent = `${text(teamA.participant_count, "0")} runners`;
+  document.getElementById("teamBDistance").textContent = km(teamB.total_distance_km);
+  document.getElementById("teamBMeta").textContent = `${text(teamB.participant_count, "0")} runners`;
   document.getElementById("totalRuns").textContent = String(totalRuns);
-  document.getElementById("todayDistance").textContent = km(todayDistance);
+  document.getElementById("todayDistance").textContent = `${km(todayDistance)} today`;
   document.getElementById("lastUpdated").textContent = prettyDateTime(data.generated_at);
+}
+
+function renderTeamBreakdown(data) {
+  const container = document.getElementById("teamBreakdown");
+  if (!container) return;
+
+  const teams = data.team_summary || {};
+  const orderedTeams = ["Team A", "Team B"];
+  container.innerHTML = orderedTeams.map((name) => {
+    const team = teams[name] || { total_distance_km: 0, participants: [] };
+    const participants = team.participants || [];
+    const rows = participants.length
+      ? participants.map((runner) => {
+        const teamTotal = Number(team.total_distance_km || 0);
+        const runnerTotal = Number(runner.total_distance_km || 0);
+        const share = teamTotal > 0 ? Math.round((runnerTotal / teamTotal) * 100) : 0;
+        return `
+          <div class="team-runner-row">
+            <div>
+              <strong>${escapeHtml(runner.display_name)}</strong>
+              <span>${text(runner.total_runs, "0")} runs</span>
+            </div>
+            <div class="contribution-meter" aria-label="${escapeAttr(runner.display_name)} contribution ${share}%">
+              <span style="width: ${share}%"></span>
+            </div>
+            <strong>${km(runner.total_distance_km)}</strong>
+          </div>
+        `;
+      }).join("")
+      : `<div class="empty-state">No runners assigned yet.</div>`;
+
+    return `
+      <article class="team-breakdown-card">
+        <div class="team-breakdown-head">
+          <h3>${name}</h3>
+          <strong>${km(team.total_distance_km)}</strong>
+        </div>
+        <div class="team-runner-list">${rows}</div>
+      </article>
+    `;
+  }).join("");
 }
 
 function renderLeaderboard(data) {
@@ -147,6 +228,7 @@ function renderLeaderboard(data) {
       <tr>
         <td data-label="Rank"><span class="rank-cell">#${runner.rank} ${rankChange(runner.rank_change)}</span></td>
         <td data-label="Runner"><span class="runner-name">${escapeHtml(runner.display_name)}</span></td>
+        <td data-label="Team"><span class="source-pill">${escapeHtml(teamName(runner.team))}</span></td>
         <td data-label="Distance"><strong>${km(runner.total_distance_km)}</strong></td>
         <td data-label="Today">${km(runner.distance_added_today_km)}</td>
         <td data-label="Runs">${text(runner.total_runs, "0")}</td>
@@ -209,11 +291,13 @@ async function loadLeaderboard() {
   return response.json();
 }
 
+setupJoinLinks();
 renderJoinState();
 
 loadLeaderboard()
   .then((data) => {
     renderSummary(data);
+    renderTeamBreakdown(data);
     renderLeaderboard(data);
     renderActivities(data);
     document.getElementById("syncStatus").textContent = "Synced from Strava API";
