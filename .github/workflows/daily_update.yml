@@ -27,12 +27,18 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Validate required secrets
+        env:
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          PARTICIPANT_CONFIG_JSON: ${{ secrets.PARTICIPANT_CONFIG_JSON }}
         run: |
-          test -n "${{ secrets.STRAVA_CLIENT_ID }}" || (echo "Missing STRAVA_CLIENT_ID" && exit 1)
-          test -n "${{ secrets.STRAVA_CLIENT_SECRET }}" || (echo "Missing STRAVA_CLIENT_SECRET" && exit 1)
-          test -n "${{ secrets.TELEGRAM_BOT_TOKEN }}" || (echo "Missing TELEGRAM_BOT_TOKEN" && exit 1)
-          test -n "${{ secrets.TELEGRAM_CHAT_ID }}" || (echo "Missing TELEGRAM_CHAT_ID" && exit 1)
-          test -n "${{ secrets.PARTICIPANT_CONFIG_JSON }}" || (echo "Missing PARTICIPANT_CONFIG_JSON" && exit 1)
+          test -n "$STRAVA_CLIENT_ID" || (echo "Missing STRAVA_CLIENT_ID" && exit 1)
+          test -n "$STRAVA_CLIENT_SECRET" || (echo "Missing STRAVA_CLIENT_SECRET" && exit 1)
+          test -n "$TELEGRAM_BOT_TOKEN" || (echo "Missing TELEGRAM_BOT_TOKEN" && exit 1)
+          test -n "$TELEGRAM_CHAT_ID" || (echo "Missing TELEGRAM_CHAT_ID" && exit 1)
+          test -n "$PARTICIPANT_CONFIG_JSON" || (echo "Missing PARTICIPANT_CONFIG_JSON" && exit 1)
 
       - name: Write participant config from secret
         env:
