@@ -173,7 +173,6 @@ function setupScrollEffects() {
       link.classList.toggle("active", isActive);
       if (isActive) {
         link.setAttribute("aria-current", "true");
-        link.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
       } else {
         link.removeAttribute("aria-current");
       }
@@ -431,7 +430,7 @@ loadLeaderboard()
     renderInsights(data);
     renderActivities(data);
     document.getElementById("syncStatus").textContent =
-      `Synced from Strava API, Last Updated ${prettyDateTime(data.generated_at)}`;
+      `Last Synced with Strava API on ${prettyDateTime(data.generated_at)}`;
   })
   .catch((error) => {
     console.error(error);
