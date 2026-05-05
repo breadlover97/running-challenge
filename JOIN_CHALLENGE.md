@@ -9,7 +9,7 @@ This is the browser-only flow for adding friends to the mileage challenge.
 2. Tap **Sign in with Strava** in the top right corner.
 3. Log in to Strava.
 4. Approve access for the challenge app.
-5. After Strava sends you back, enter your display name and activity source.
+5. After Strava sends you back, enter your display name.
 6. Choose **Team A** or **Team B**, then submit the join form.
 
 After the Cloudflare join flow is enabled, that is the whole process.
@@ -20,7 +20,6 @@ If the site still shows a one-time code, tap **Copy Details** and send the organ
    - one-time code
    - display name
    - chosen team
-   - activity source: `Garmin → Strava`, `Apple Watch → Strava`, or `Strava App`
 
 Do not post the code in the group chat. It can be used once and may expire quickly.
 
@@ -31,7 +30,6 @@ Do not post the code in the group chat. It can be used once and may expire quick
 2. Click **Run workflow**.
 3. Fill in:
    - `display_name`
-   - `source_label`
    - `team`
    - `strava_authorization_code`
    - leave `include_manual_activities` as `false` unless you are intentionally allowing manual entries

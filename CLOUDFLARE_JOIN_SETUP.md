@@ -145,7 +145,7 @@ Commit and push the change.
 1. Open <https://breadlover97.github.io/running-challenge/join.html>.
 2. Click **Sign in with Strava**.
 3. Approve access in Strava.
-4. Enter display name and activity source.
+4. Enter display name.
 5. Choose **Team A** or **Team B**, then submit the join form.
 6. Confirm the page says the participant is in the challenge queue.
 7. Check the GitHub workflow:

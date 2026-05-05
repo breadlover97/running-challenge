@@ -41,26 +41,20 @@ Flow:
 3. Log in to Strava.
 4. Approve access.
 5. Strava redirects you to the join page.
-6. Enter your display name and activity source.
+6. Enter your display name.
 7. Choose **Team A** or **Team B**, then submit the join form.
 
 After the Cloudflare join flow is enabled, you do not need to copy or send a Strava code to the organiser.
 
 Temporary manual flow:
 
-If the site still shows a one-time Strava code, tap **Copy Details** and send the code privately to the organiser with your display name, activity source, and chosen team.
-
-Activity source options:
-
-- `Garmin → Strava`
-- `Apple Watch → Strava`
-- `Strava App`
+If the site still shows a one-time Strava code, tap **Copy Details** and send the code privately to the organiser with your display name and chosen team.
 
 Organiser flow:
 
 1. Open [Add Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml).
 2. Click **Run workflow**.
-3. Enter the participant's display name, source label, team, and one-time code.
+3. Enter the participant's display name, team, and one-time code.
 4. Click **Run workflow**.
 5. The workflow refreshes the public leaderboard. Telegram updates still go out through the daily workflow.
 

@@ -73,7 +73,6 @@ Copy `config.example.json` to a private local `config.json` for local testing. D
       "strava_athlete_id": "123456",
       "strava_refresh_token": "REFRESH_TOKEN_HERE",
       "team": "Team A",
-      "source_label": "Garmin → Strava",
       "include_manual_activities": false
     }
   ]
@@ -89,7 +88,7 @@ Copy `config.example.json` to a private local `config.json` for local testing. D
    [Sign in with Strava](https://breadlover97.github.io/running-challenge/join.html)
 5. In the temporary manual flow, when they send you the one-time code and chosen team, open:
    [Add Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml)
-6. Click **Run workflow**, enter their display name, source label, team, and code.
+6. Click **Run workflow**, enter their display name, team, and code.
 7. The workflow updates the participant config and refreshes the public leaderboard. Telegram updates still go out through the daily workflow.
 
 To change a participant's team later, open:
@@ -106,7 +105,7 @@ With the Worker enabled, participants:
 
 1. Tap **Sign in with Strava**.
 2. Approve Strava once.
-3. Enter display name, source, and team on the follow-up join page.
+3. Enter display name and team on the follow-up join page.
 4. Submit once while GitHub Actions adds them automatically.
 
 Setup guide: [CLOUDFLARE_JOIN_SETUP.md](CLOUDFLARE_JOIN_SETUP.md)
@@ -120,7 +119,6 @@ export STRAVA_CLIENT_ID="..."
 export STRAVA_CLIENT_SECRET="..."
 python3 scripts/strava_oauth_helper.py \
   --display-name "Tai Zhi" \
-  --source-label "Garmin → Strava" \
   --config config.json
 ```
 
@@ -216,7 +214,6 @@ export STRAVA_CLIENT_ID="..."
 export STRAVA_CLIENT_SECRET="..."
 python3 scripts/strava_oauth_helper.py \
   --display-name "Tai Zhi" \
-  --source-label "Garmin → Strava" \
   --config config.json
 ```
 
@@ -248,7 +245,7 @@ python3 scripts/send_telegram.py
 ## Privacy Notes
 
 - Participants should consent before their data is included.
-- The public site shows names, mileage totals, daily mileage, source labels, and Strava validation links.
+- The public site shows names, mileage totals, daily mileage, teams, and Strava validation links.
 - The Telegram group message may mention daily mileage.
 - The scripts intentionally do not save maps, latitude/longitude, start/end coordinates, heart rate, cadence, power, or detailed sensor data.
 - A participant can leave by asking the organiser to run the remove-participant workflow, which removes their token from the private config and refreshes the public leaderboard.

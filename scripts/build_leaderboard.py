@@ -66,7 +66,6 @@ def public_activity(activity: dict[str, Any]) -> dict[str, Any]:
         "distance_km": one_decimal(activity.get("distance_km")),
         "moving_time_seconds": int(activity.get("moving_time_seconds") or 0),
         "elapsed_time_seconds": int(activity.get("elapsed_time_seconds") or 0),
-        "source_label": activity.get("source_label", "Strava"),
         "team": team_name(activity.get("team")),
         "is_manual": bool(activity.get("is_manual", False)),
         "strava_activity_url": activity.get("strava_activity_url", ""),
@@ -90,7 +89,6 @@ def build_leaderboard(raw: dict[str, Any], previous: dict[str, Any], today: str)
             "athlete_id": athlete_id,
             "display_name": participant.get("display_name", "Unknown runner"),
             "team": team_name(participant.get("team")),
-            "source_label": participant.get("source_label", "Strava"),
             "total_distance_raw": 0.0,
             "total_runs": 0,
             "latest_activity_date": None,
@@ -108,7 +106,6 @@ def build_leaderboard(raw: dict[str, Any], previous: dict[str, Any], today: str)
                 "athlete_id": athlete_id,
                 "display_name": activity.get("athlete_display_name", "Unknown runner"),
                 "team": team_name(activity.get("team")),
-                "source_label": activity.get("source_label", "Strava"),
                 "total_distance_raw": 0.0,
                 "total_runs": 0,
                 "latest_activity_date": None,
@@ -168,7 +165,6 @@ def build_leaderboard(raw: dict[str, Any], previous: dict[str, Any], today: str)
                 "latest_activity_date": runner["latest_activity_date"],
                 "daily_distance_km": daily_distance,
                 "longest_run": runner["longest_run"],
-                "source_label": runner["source_label"],
                 "last_synced_at": runner["last_synced_at"] or raw.get("generated_at"),
                 "activities": sorted_activities,
             }
@@ -222,7 +218,6 @@ def build_leaderboard(raw: dict[str, Any], previous: dict[str, Any], today: str)
         row["athlete_id"]: {
             "display_name": row["display_name"],
             "team": row["team"],
-            "source_label": row["source_label"],
             "activities": row["activities"],
         }
         for row in rows

@@ -134,7 +134,7 @@ function renderJoinState() {
 
   title.textContent = "Strava authorization received";
   message.textContent =
-    "Temporary manual flow: copy these details and send them privately to the organiser with your display name, activity source, and chosen team.";
+    "Temporary manual flow: copy these details and send them privately to the organiser with your display name and chosen team.";
   codeBox.textContent = code;
   copyButton.hidden = false;
   copyButton.addEventListener("click", async () => {
@@ -226,12 +226,11 @@ function renderLeaderboard(data) {
       <tr>
         <td data-label="Rank"><span class="rank-cell">#${runner.rank} ${rankChange(runner.rank_change)}</span></td>
         <td data-label="Runner"><span class="runner-name">${escapeHtml(runner.display_name)}</span></td>
-        <td data-label="Team"><span class="source-pill">${escapeHtml(teamName(runner.team))}</span></td>
+        <td data-label="Team"><span class="meta-pill">${escapeHtml(teamName(runner.team))}</span></td>
         <td data-label="Distance"><strong>${km(runner.total_distance_km)}</strong></td>
         <td data-label="Today">${km(runner.distance_added_today_km)}</td>
         <td data-label="Runs">${text(runner.total_runs, "0")}</td>
         <td data-label="Last Run">${prettyDate(runner.latest_activity_date)}</td>
-        <td data-label="Source"><span class="source-pill">${escapeHtml(runner.source_label)}</span></td>
         <td data-label="Validation">${validation}</td>
       </tr>
     `;

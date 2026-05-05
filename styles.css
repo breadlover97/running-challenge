@@ -482,7 +482,7 @@ main {
   font-weight: 900;
 }
 
-.source-pill,
+.meta-pill,
 .validation-pill {
   display: inline-flex;
   align-items: center;
