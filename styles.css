@@ -188,10 +188,15 @@ h2 {
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
-  max-width: 620px;
+  max-width: none;
   margin-bottom: 0;
   font-size: 1.08rem;
   font-weight: 700;
+}
+
+.wide-copy {
+  max-width: none;
+  white-space: nowrap;
 }
 
 .countdown-pill {
@@ -553,31 +558,33 @@ main {
 
 .flow-list {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   margin-top: 18px;
 }
 
 .flow-step {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  gap: 12px;
-  align-items: start;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
 }
 
 .flow-step > strong {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 22px;
+  height: 22px;
   place-items: center;
   border-radius: 50%;
-  background: var(--ink);
-  color: #fff;
-  font-size: 0.84rem;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 900;
 }
 
 .flow-step > span {
   color: var(--muted);
-  font-weight: 750;
+  font-size: 0.94rem;
+  font-weight: 700;
 }
 
 .team-breakdown {
@@ -1082,6 +1089,10 @@ main {
   .section-heading p {
     max-width: none;
     text-align: left;
+    white-space: normal;
+  }
+
+  .wide-copy {
     white-space: normal;
   }
 
