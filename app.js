@@ -138,6 +138,92 @@ function challengeDayText(challenge, generatedAt) {
   return `Day ${currentDay} of ${totalDays}`;
 }
 
+function dateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function daysBetween(start, end) {
+  const oneDay = 24 * 60 * 60 * 1000;
+  return Math.max(Math.round((end - start) / oneDay), 0);
+}
+
+function addDays(date, days) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function cumulativeTeamSeries(data, team) {
+  const start = parseLocalDate(data.challenge?.start_date);
+  const end = parseLocalDate(data.challenge?.end_date);
+  if (!start || !end) return [];
+
+  const generated = parseLocalDate(String(data.generated_at || "").slice(0, 10)) || new Date();
+  const chartEnd = generated < start ? start : generated > end ? end : generated;
+  const totalChallengeDays = Math.max(daysBetween(start, end), 1);
+  const dailyTotals = {};
+
+  (data.leaderboard || [])
+    .filter((runner) => teamName(runner.team) === team)
+    .forEach((runner) => {
+      Object.entries(runner.daily_distance_km || {}).forEach(([day, distance]) => {
+        dailyTotals[day] = Number(dailyTotals[day] || 0) + Number(distance || 0);
+      });
+    });
+
+  const series = [];
+  let cumulative = 0;
+  const elapsedDays = daysBetween(start, chartEnd);
+  for (let offset = 0; offset <= elapsedDays; offset += 1) {
+    const day = dateKey(addDays(start, offset));
+    cumulative += Number(dailyTotals[day] || 0);
+    series.push({
+      x: offset / totalChallengeDays,
+      y: cumulative,
+      date: day,
+    });
+  }
+  return series.length ? series : [{ x: 0, y: 0, date: dateKey(start) }];
+}
+
+function renderTeamChart(elementId, data, team) {
+  const container = document.getElementById(elementId);
+  if (!container) return;
+
+  const series = cumulativeTeamSeries(data, team);
+  const width = 320;
+  const height = 104;
+  const padding = 12;
+  const maxDistance = Math.max(...series.map((point) => point.y), 1);
+  const points = series.map((point) => {
+    const x = padding + point.x * (width - padding * 2);
+    const y = height - padding - (point.y / maxDistance) * (height - padding * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+  const latest = series[series.length - 1] || { y: 0, date: "" };
+  const latestPoint = points.split(" ").pop()?.split(",") || [padding, height - padding];
+  const color = team === "Team B" ? "var(--team-b)" : "var(--team-a)";
+  const label = latest.y > 0 ? `${km(latest.y)} by ${prettyDate(latest.date)}` : "No distance logged yet";
+
+  container.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeAttr(`${team} cumulative distance chart`)}" preserveAspectRatio="none">
+      <line class="chart-axis" x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}"></line>
+      <line class="chart-axis" x1="${padding}" y1="${padding}" x2="${padding}" y2="${height - padding}"></line>
+      <polyline class="chart-line" style="stroke: ${color}" points="${points}"></polyline>
+      <circle class="chart-dot" style="fill: ${color}" cx="${latestPoint[0]}" cy="${latestPoint[1]}" r="4"></circle>
+    </svg>
+    <span>${escapeHtml(label)}</span>
+  `;
+}
+
+function renderTeamCharts(data) {
+  renderTeamChart("teamAChart", data, "Team A");
+  renderTeamChart("teamBChart", data, "Team B");
+}
+
 function setupJoinLinks() {
   const links = document.querySelectorAll(".strava-join-link");
   links.forEach((link) => {
@@ -228,8 +314,6 @@ function setupScrollEffects() {
 
 function renderSummary(data) {
   const leaderboard = data.leaderboard || [];
-  const totalRuns = leaderboard.reduce((sum, runner) => sum + Number(runner.total_runs || 0), 0);
-  const todayDistance = Number(data.daily_summary?.total_distance_km || 0);
   const teamSummary = data.team_summary || {};
   const teamA = teamSummary["Team A"] || {};
   const teamB = teamSummary["Team B"] || {};
@@ -242,8 +326,7 @@ function renderSummary(data) {
   document.getElementById("teamAMeta").textContent = `${text(teamA.participant_count, "0")} runners`;
   document.getElementById("teamBDistance").textContent = km(teamB.total_distance_km);
   document.getElementById("teamBMeta").textContent = `${text(teamB.participant_count, "0")} runners`;
-  document.getElementById("totalRuns").textContent = String(totalRuns);
-  document.getElementById("todayDistance").textContent = `${km(todayDistance)} today`;
+  renderTeamCharts(data);
 }
 
 function renderTeamBreakdown(data) {
@@ -342,6 +425,8 @@ function renderInsights(data) {
     .sort((a, b) => Number(b.run.distance_km || 0) - Number(a.run.distance_km || 0))[0];
   const today = data.daily_summary || {};
   const todayRunners = today.runners || [];
+  const totalDistance = leaderboard.reduce((sum, runner) => sum + Number(runner.total_distance_km || 0), 0);
+  const totalActivities = leaderboard.reduce((sum, runner) => sum + Number(runner.total_runs || 0), 0);
 
   const cards = [
     insightCard(
@@ -350,6 +435,8 @@ function renderInsights(data) {
       `Team A: ${km(teamA.total_distance_km)} · Team B: ${km(teamB.total_distance_km)}`,
       teamGap === 0 ? "" : teamClass(leadingTeam),
     ),
+    insightCard("Run distance logged", km(totalDistance), "Combined counted distance from both teams."),
+    insightCard("Activity count", String(totalActivities), "Counted Strava run activities in the challenge period."),
     topRunner
       ? insightCard("Top runner", topRunner.display_name, `${km(topRunner.total_distance_km)} across ${topRunner.total_runs} runs`)
       : insightCard("Top runner", "No runs yet", "The leaderboard will update after the first Strava sync."),

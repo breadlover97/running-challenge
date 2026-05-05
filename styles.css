@@ -257,8 +257,8 @@ main {
 
 .team-summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
   margin-bottom: 24px;
 }
 
@@ -273,9 +273,18 @@ main {
 
 .team-card {
   position: relative;
-  min-height: 136px;
+  display: grid;
+  grid-template-columns: minmax(140px, 0.72fr) minmax(220px, 1fr);
+  gap: 18px;
+  align-items: center;
+  min-height: 188px;
   overflow: hidden;
-  padding: 20px;
+  padding: 22px;
+}
+
+.team-card-copy {
+  position: relative;
+  z-index: 1;
 }
 
 .team-card::after {
@@ -309,7 +318,7 @@ main {
   line-height: 1;
 }
 
-.team-card > span:last-child {
+.team-card-copy > span:last-child {
   display: block;
   margin-top: 12px;
   color: var(--muted);
@@ -328,6 +337,45 @@ main {
 .team-card.compact strong {
   font-size: clamp(1.1rem, 1.8vw, 1.65rem);
   line-height: 1.15;
+}
+
+.team-chart {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.team-chart svg {
+  width: 100%;
+  height: 104px;
+  overflow: visible;
+}
+
+.chart-axis {
+  stroke: rgba(5, 5, 5, 0.1);
+  stroke-width: 1.5;
+}
+
+.chart-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+  filter: drop-shadow(0 6px 12px rgba(5, 5, 5, 0.08));
+}
+
+.chart-dot {
+  stroke: #fff;
+  stroke-width: 3;
+}
+
+.team-chart span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-align: right;
 }
 
 .panel,
@@ -522,9 +570,10 @@ main {
 }
 
 .section-heading p {
-  max-width: 360px;
+  max-width: none;
   margin-bottom: 0;
   text-align: right;
+  white-space: nowrap;
 }
 
 .table-wrap {
@@ -622,7 +671,7 @@ main {
 
 .insights-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 12px;
 }
 
@@ -839,6 +888,14 @@ main {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .team-card {
+    grid-template-columns: 1fr;
+  }
+
+  .team-chart span {
+    text-align: left;
+  }
+
   .team-breakdown {
     grid-template-columns: 1fr;
   }
@@ -850,6 +907,7 @@ main {
   .section-heading p {
     max-width: none;
     text-align: left;
+    white-space: normal;
   }
 
 }
