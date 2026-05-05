@@ -35,12 +35,14 @@ running-challenge/
 │   ├── send_telegram.py
 │   ├── strava_oauth_helper.py
 │   ├── add_participant_from_code.py
-│   └── update_participant_team.py
+│   ├── update_participant_team.py
+│   └── remove_participant.py
 ├── .github/
 │   └── workflows/
 │       ├── daily_update.yml
 │       ├── add_participant.yml
-│       └── update_team.yml
+│       ├── update_team.yml
+│       └── remove_participant.yml
 ├── cloudflare-worker/
 │   ├── src/
 │   │   └── index.js
@@ -92,6 +94,9 @@ Copy `config.example.json` to a private local `config.json` for local testing. D
 
 To change a participant's team later, open:
 [Update Participant Team](https://github.com/breadlover97/running-challenge/actions/workflows/update_team.yml)
+
+To remove a participant later, open:
+[Remove Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/remove_participant.yml)
 
 ## One-Step Participant Join
 
@@ -246,7 +251,7 @@ python3 scripts/send_telegram.py
 - The public site shows names, mileage totals, daily mileage, source labels, and Strava validation links.
 - The Telegram group message may mention daily mileage.
 - The scripts intentionally do not save maps, latitude/longitude, start/end coordinates, heart rate, cadence, power, or detailed sensor data.
-- A participant can leave by asking the organiser to remove their token and delete their data from the generated leaderboard.
+- A participant can leave by asking the organiser to run the remove-participant workflow, which removes their token from the private config and refreshes the public leaderboard.
 
 ## Limitations
 

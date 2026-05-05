@@ -76,7 +76,7 @@ By joining the challenge, you agree that:
 - GPS maps, exact start/end locations, coordinates, heart rate, cadence, and power will not be displayed.
 - Only running activities within the challenge period will count.
 - Manual activities are excluded by default.
-- You can leave the challenge by asking the organiser to remove your token and data.
+- You can leave the challenge by asking the organiser to remove your token and refresh the public leaderboard.
 
 ## F. Troubleshooting
 

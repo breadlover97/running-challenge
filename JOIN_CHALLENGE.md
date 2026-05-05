@@ -48,6 +48,15 @@ To change a participant's team after joining:
 4. Pick **Team A** or **Team B**.
 5. Run [Daily Mileage Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml) to refresh public data.
 
+To remove a participant from the challenge:
+
+1. Open [Remove Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/remove_participant.yml).
+2. Click **Run workflow**.
+3. Enter the participant's exact display name or Strava athlete ID.
+4. Type `REMOVE` in the confirmation field.
+5. Click **Run workflow**.
+6. The workflow removes their Strava refresh token from the private config and refreshes the public leaderboard.
+
 ## One-Time Setup Required
 
 The add-participant workflow needs `GH_SECRETS_TOKEN` because it updates the hidden `PARTICIPANT_CONFIG_JSON` GitHub secret.
