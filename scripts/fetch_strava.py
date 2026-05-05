@@ -315,6 +315,11 @@ def main() -> int:
         help="Ignored local file written when Strava returns rotated refresh tokens",
     )
     parser.add_argument("--dry-run", action="store_true", help="Validate config without calling Strava")
+    parser.add_argument(
+        "--fail-on-participant-errors",
+        action="store_true",
+        help="Exit with failure when any participant cannot be fetched, preventing stale or partial leaderboard publishes.",
+    )
     args = parser.parse_args()
 
     try:
@@ -416,6 +421,12 @@ def main() -> int:
 
         if output["validation_summary"]["errors"]:
             print("Completed with participant-level Strava errors.", file=sys.stderr)
+            if args.fail_on_participant_errors:
+                print(
+                    "Strict mode is enabled, so the workflow will stop before publishing a partial leaderboard.",
+                    file=sys.stderr,
+                )
+                return 1
         else:
             print(f"Fetched {len(output['activities'])} counted runs total.")
         return 0

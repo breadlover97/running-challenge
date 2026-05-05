@@ -15,6 +15,10 @@ on:
           - "Team A"
           - "Team B"
 
+concurrency:
+  group: participant-config
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -67,14 +71,17 @@ jobs:
           STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
           GH_SECRETS_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
         run: |
+          fetch_status=0
           python scripts/fetch_strava.py \
             --config "$RUNNER_TEMP/participant_config.updated.json" \
             --output generated/activities.json \
-            --updated-config-output "$RUNNER_TEMP/participant_config.synced.json"
+            --updated-config-output "$RUNNER_TEMP/participant_config.synced.json" \
+            --fail-on-participant-errors || fetch_status=$?
           if [ -f "$RUNNER_TEMP/participant_config.synced.json" ]; then
             GH_TOKEN="$GH_SECRETS_TOKEN" gh secret set PARTICIPANT_CONFIG_JSON < "$RUNNER_TEMP/participant_config.synced.json"
             echo "Updated PARTICIPANT_CONFIG_JSON with rotated Strava refresh token(s)."
           fi
+          exit "$fetch_status"
 
       - name: Build leaderboard JSON
         run: python scripts/build_leaderboard.py --input generated/activities.json --output data/leaderboard.json

@@ -112,6 +112,8 @@ Cloudflare Worker variables:
 - [Update Participant Team](https://github.com/breadlover97/running-challenge/actions/workflows/update_team.yml): changes Team A/B assignment and refreshes the leaderboard.
 - [Remove Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/remove_participant.yml): removes a participant token from the private config and refreshes the leaderboard.
 
+These workflows share a `participant-config` concurrency lock so participant joins, removals, team changes, and daily token refreshes do not overwrite each other. They also stop before publishing a new leaderboard if any participant's Strava data cannot be fetched.
+
 ## Participant Signup
 
 Participants use:
