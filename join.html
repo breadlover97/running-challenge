@@ -15,7 +15,7 @@
       </a>
       <div class="nav-actions">
         <a id="joinStravaLink" class="primary-action compact-action strava-join-link" href="https://running-challenge-join.ngimtaizhi.workers.dev/start">Sign in with Strava</a>
-        <a class="secondary-action compact-action" href="index.html">Leaderboard</a>
+        <a class="secondary-action compact-action" href="index.html">Return to main page</a>
       </div>
     </nav>
 
@@ -31,23 +31,23 @@
         <h2>For Participants</h2>
         <ol>
           <li>Tap <strong>Sign in with Strava</strong> in the header.</li>
-          <li>Log in to Strava and approve access once.</li>
-          <li>After Strava sends you back, enter your display name.</li>
+          <li>Log in to Strava and approve the challenge app once.</li>
+          <li>After Strava sends you back, enter the display name you want shown.</li>
           <li>Choose <strong>Team A</strong> or <strong>Team B</strong>, then submit the join form.</li>
-          <li>You are done. No code copying is needed after the Cloudflare join flow is enabled.</li>
+          <li>You are done. Your runs will appear after the GitHub workflow and next Strava sync complete.</li>
         </ol>
-        <p>If the site still shows a one-time Strava code, the organiser has not switched on the automatic join flow yet.</p>
+        <p>No terminal, GitHub account, or code copying is needed. Garmin and Apple Watch runs count after they appear in Strava as runs.</p>
       </section>
 
       <section class="info-section join-instructions">
         <h2>For The Organiser</h2>
         <ol>
-          <li>Create and deploy the Cloudflare Worker in <code>cloudflare-worker/</code>.</li>
-          <li>Update Strava's callback domain to the Worker domain.</li>
-          <li>Set <code>JOIN_WORKER_START_URL</code> in <code>app.js</code> to the Worker's <code>/start</code> URL.</li>
-          <li>Participants can then join directly from this page.</li>
+          <li>New signups are handled by the Cloudflare Worker, which triggers the <a href="https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml">Add Strava Participant</a> workflow.</li>
+          <li>To move someone between teams, run <a href="https://github.com/breadlover97/running-challenge/actions/workflows/update_team.yml">Update Participant Team</a>.</li>
           <li>To remove someone, run <a href="https://github.com/breadlover97/running-challenge/actions/workflows/remove_participant.yml">Remove Strava Participant</a>.</li>
+          <li>The daily sync runs at 7:00 am Singapore time and can also be triggered manually from GitHub Actions.</li>
         </ol>
+        <p>For the full architecture and API flow, read <a href="backend.html">How the backend works</a>.</p>
       </section>
 
       <section class="info-section">
@@ -58,6 +58,10 @@
         </p>
       </section>
     </main>
+    <footer class="site-footer">
+      <span>2026 Run Challenge setup</span>
+      <span><a href="backend.html">Backend setup</a> · <a href="index.html">Return to main page</a></span>
+    </footer>
     <script>
       const formatDate = new Intl.DateTimeFormat("en-SG", {
         day: "numeric",

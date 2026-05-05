@@ -19,7 +19,18 @@ const formatDateTime = new Intl.DateTimeFormat("en-SG", {
   year: "numeric",
   hour: "2-digit",
   minute: "2-digit",
+  timeZone: "Asia/Singapore",
   timeZoneName: "short"
+});
+
+const singaporePartsFormatter = new Intl.DateTimeFormat("en-CA", {
+  day: "2-digit",
+  hour: "2-digit",
+  hourCycle: "h23",
+  minute: "2-digit",
+  month: "2-digit",
+  timeZone: "Asia/Singapore",
+  year: "numeric"
 });
 
 function text(value, fallback = "-") {
@@ -75,6 +86,45 @@ function duration(seconds) {
   const minutes = Math.floor((value % 3600) / 60);
   if (hours > 0) return `${hours}h ${minutes}m`;
   return `${minutes}m`;
+}
+
+function runnerIcon() {
+  return `
+    <svg class="runner-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="13" cy="4" r="2.1"></circle>
+      <path d="M10 8.2l4 2.1 3.2-1.9M14 10.3l-3 4 4 3.2M11 14.3l-4.2 1.4-2 3.7M15 17.5l2.5 3.2M10 8.2l-2.4 3.2"></path>
+    </svg>
+  `;
+}
+
+function runnerCountMarkup(count) {
+  const value = Number(count || 0);
+  const label = `${value} runner${value === 1 ? "" : "s"}`;
+  return `<span class="runner-count" title="${escapeAttr(label)}" aria-label="${escapeAttr(label)}">${runnerIcon()}<span aria-hidden="true">${value}</span></span>`;
+}
+
+function singaporeDateParts(value) {
+  const parts = singaporePartsFormatter.formatToParts(value).reduce((result, part) => {
+    result[part.type] = part.value;
+    return result;
+  }, {});
+  return {
+    day: Number(parts.day),
+    hour: Number(parts.hour),
+    minute: Number(parts.minute),
+    month: Number(parts.month),
+    year: Number(parts.year)
+  };
+}
+
+function nextScheduledSync(generatedAt) {
+  const base = parseDate(generatedAt) || new Date();
+  const parts = singaporeDateParts(base);
+  const nextDate = new Date(parts.year, parts.month - 1, parts.day);
+  if (parts.hour >= 7) {
+    nextDate.setDate(nextDate.getDate() + 1);
+  }
+  return `${dateKey(nextDate)}T07:00:00+08:00`;
 }
 
 function rankChange(value) {
@@ -361,9 +411,9 @@ function renderSummary(data) {
     `${prettyDate(data.challenge?.start_date)} to ${prettyDate(data.challenge?.end_date)}`;
   document.getElementById("challengeCountdown").textContent = challengeDayText(data.challenge, data.generated_at);
   document.getElementById("teamADistance").textContent = km(teamA.total_distance_km);
-  document.getElementById("teamAMeta").textContent = `${text(teamA.participant_count, "0")} runners`;
+  document.getElementById("teamAMeta").innerHTML = runnerCountMarkup(teamA.participant_count);
   document.getElementById("teamBDistance").textContent = km(teamB.total_distance_km);
-  document.getElementById("teamBMeta").textContent = `${text(teamB.participant_count, "0")} runners`;
+  document.getElementById("teamBMeta").innerHTML = runnerCountMarkup(teamB.participant_count);
   renderTeamComparisonChart(data);
 }
 
@@ -638,6 +688,8 @@ loadLeaderboard()
     renderActivities(data);
     document.getElementById("syncStatus").textContent =
       `Last Synced with Strava API on ${prettyDateTime(data.generated_at)}`;
+    document.getElementById("syncScheduleNote").textContent =
+      `Syncs automatically every day at 7:00 am SGT. Next scheduled sync: ${prettyDateTime(nextScheduledSync(data.generated_at))}.`;
   })
   .catch((error) => {
     console.error(error);
