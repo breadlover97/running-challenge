@@ -80,12 +80,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase
           git add data/leaderboard.json
           if git diff --cached --quiet; then
             echo "No leaderboard changes to commit."
           else
             git commit -m "Remove participant from leaderboard"
+            git pull --rebase
             git push
           fi
 
