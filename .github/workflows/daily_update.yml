@@ -84,5 +84,6 @@ jobs:
             echo "No leaderboard changes to commit."
           else
             git commit -m "Update mileage challenge leaderboard"
+            git pull --rebase
             git push
           fi

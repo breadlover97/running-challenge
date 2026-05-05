@@ -1,7 +1,4 @@
 const DATA_URL = "data/leaderboard.json";
-const STRAVA_CLIENT_ID = "235397";
-const STRAVA_REDIRECT_URI = "https://breadlover97.github.io/running-challenge/";
-const STRAVA_SCOPE = "read,activity:read_all";
 const JOIN_WORKER_START_URL = "https://running-challenge-join.ngimtaizhi.workers.dev/start";
 
 const formatDate = new Intl.DateTimeFormat("en-SG", {
@@ -84,69 +81,8 @@ function teamName(value) {
 
 function setupJoinLinks() {
   const links = document.querySelectorAll(".strava-join-link");
-
-  function updateLinks() {
-    const url = JOIN_WORKER_START_URL
-      ? new URL(JOIN_WORKER_START_URL)
-      : new URL("https://www.strava.com/oauth/authorize");
-
-    if (!JOIN_WORKER_START_URL) {
-      url.searchParams.set("client_id", STRAVA_CLIENT_ID);
-      url.searchParams.set("redirect_uri", STRAVA_REDIRECT_URI);
-      url.searchParams.set("response_type", "code");
-      url.searchParams.set("approval_prompt", "force");
-      url.searchParams.set("scope", STRAVA_SCOPE);
-      url.searchParams.set("state", "manual");
-    }
-
-    links.forEach((link) => {
-      link.href = url.toString();
-    });
-  }
-
-  updateLinks();
-}
-
-function renderJoinState() {
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get("code");
-  const error = params.get("error");
-  const joinPanel = document.getElementById("joinPanel");
-  const title = document.getElementById("joinPanelTitle");
-  const message = document.getElementById("joinPanelMessage");
-  const codeBox = document.getElementById("stravaCode");
-  const copyButton = document.getElementById("copyCodeButton");
-
-  if (!joinPanel || (!code && !error)) {
-    return;
-  }
-
-  joinPanel.hidden = false;
-  joinPanel.scrollIntoView({ behavior: "smooth", block: "start" });
-
-  if (error) {
-    title.textContent = "Strava authorization was not completed";
-    message.textContent = "Please try again, or tell the organiser if you did not mean to cancel.";
-    codeBox.textContent = error;
-    copyButton.hidden = true;
-    return;
-  }
-
-  title.textContent = "Strava authorization received";
-  message.textContent =
-    "Temporary manual flow: copy these details and send them privately to the organiser with your display name and chosen team.";
-  codeBox.textContent = code;
-  copyButton.hidden = false;
-  copyButton.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(`Strava code: ${code}`);
-      copyButton.textContent = "Copied";
-      window.setTimeout(() => {
-        copyButton.textContent = "Copy Details";
-      }, 1800);
-    } catch (clipboardError) {
-      copyButton.textContent = "Select code";
-    }
+  links.forEach((link) => {
+    link.href = JOIN_WORKER_START_URL;
   });
 }
 
@@ -289,7 +225,6 @@ async function loadLeaderboard() {
 }
 
 setupJoinLinks();
-renderJoinState();
 
 loadLeaderboard()
   .then((data) => {

@@ -15,6 +15,9 @@ on:
           - "Team A"
           - "Team B"
 
+permissions:
+  contents: write
+
 jobs:
   update-team:
     runs-on: ubuntu-latest
@@ -27,12 +30,20 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
       - name: Validate setup secrets
         env:
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
           PARTICIPANT_CONFIG_JSON: ${{ secrets.PARTICIPANT_CONFIG_JSON }}
           GH_SECRETS_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
         run: |
+          test -n "$STRAVA_CLIENT_ID" || (echo "Missing STRAVA_CLIENT_ID" && exit 1)
+          test -n "$STRAVA_CLIENT_SECRET" || (echo "Missing STRAVA_CLIENT_SECRET" && exit 1)
           test -n "$PARTICIPANT_CONFIG_JSON" || (echo "Missing PARTICIPANT_CONFIG_JSON" && exit 1)
           test -n "$GH_SECRETS_TOKEN" || (echo "Missing GH_SECRETS_TOKEN" && exit 1)
 
@@ -50,5 +61,36 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
         run: gh secret set PARTICIPANT_CONFIG_JSON < "$RUNNER_TEMP/participant_config.updated.json"
 
+      - name: Fetch Strava activities with updated config
+        env:
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          GH_SECRETS_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
+        run: |
+          python scripts/fetch_strava.py \
+            --config "$RUNNER_TEMP/participant_config.updated.json" \
+            --output generated/activities.json \
+            --updated-config-output "$RUNNER_TEMP/participant_config.synced.json"
+          if [ -f "$RUNNER_TEMP/participant_config.synced.json" ]; then
+            GH_TOKEN="$GH_SECRETS_TOKEN" gh secret set PARTICIPANT_CONFIG_JSON < "$RUNNER_TEMP/participant_config.synced.json"
+            echo "Updated PARTICIPANT_CONFIG_JSON with rotated Strava refresh token(s)."
+          fi
+
+      - name: Build leaderboard JSON
+        run: python scripts/build_leaderboard.py --input generated/activities.json --output data/leaderboard.json
+
+      - name: Commit leaderboard update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/leaderboard.json
+          if git diff --cached --quiet; then
+            echo "No leaderboard changes to commit."
+          else
+            git commit -m "Update leaderboard after team change"
+            git pull --rebase
+            git push
+          fi
+
       - name: Done
-        run: echo "Team updated. Run the Daily Mileage Challenge Update workflow to refresh the public leaderboard."
+        run: echo "Team updated and public leaderboard refreshed."

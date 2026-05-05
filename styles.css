@@ -88,26 +88,6 @@ button,
   justify-content: flex-end;
 }
 
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  margin: 0 0 12px;
-  color: var(--orange);
-  font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-.eyebrow::before {
-  display: inline-block;
-  width: 28px;
-  height: 3px;
-  background: var(--orange);
-  content: "";
-}
-
 h1,
 h2,
 p {
@@ -146,8 +126,7 @@ h2 {
 }
 
 .primary-action,
-.secondary-action,
-.code-card button {
+.secondary-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -179,16 +158,8 @@ h2 {
 }
 
 .primary-action:hover,
-.secondary-action:hover,
-.code-card button:hover {
+.secondary-action:hover {
   transform: translateY(-2px);
-}
-
-.code-card button {
-  border-color: var(--orange);
-  background: var(--ink);
-  color: #fff;
-  cursor: pointer;
 }
 
 main {
@@ -205,8 +176,7 @@ main {
 
 .team-card,
 .panel,
-.info-section,
-.join-panel {
+.info-section {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 18px;
@@ -273,47 +243,9 @@ main {
 }
 
 .panel,
-.info-section,
-.join-panel {
+.info-section {
   margin-top: 18px;
   padding: clamp(18px, 3vw, 30px);
-}
-
-.join-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 430px);
-  gap: 18px;
-  align-items: center;
-  border-color: rgba(252, 76, 2, 0.36);
-  background: var(--orange-soft);
-}
-
-.join-panel[hidden] {
-  display: none;
-}
-
-.join-panel p {
-  margin-bottom: 0;
-}
-
-.code-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: center;
-}
-
-.code-card code {
-  display: block;
-  min-width: 0;
-  overflow-wrap: anywhere;
-  padding: 14px;
-  border: 1px solid rgba(252, 76, 2, 0.32);
-  border-radius: 12px;
-  background: #fff;
-  color: var(--ink);
-  font-size: 0.92rem;
-  font-weight: 800;
 }
 
 .join-instructions {
@@ -628,9 +560,6 @@ main {
     text-align: left;
   }
 
-  .join-panel {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 640px) {
@@ -686,8 +615,7 @@ main {
   }
 
   .panel,
-  .info-section,
-  .join-panel {
+  .info-section {
     border-radius: 16px;
     padding: 18px;
   }
@@ -743,10 +671,6 @@ main {
   .activity-row {
     grid-template-columns: 1fr;
     gap: 5px;
-  }
-
-  .code-card {
-    grid-template-columns: 1fr;
   }
 
   .team-runner-row {
