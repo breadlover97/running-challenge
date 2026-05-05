@@ -105,8 +105,10 @@ function avatarMarkup(runner, size = "regular") {
   const imageUrl = safeImageUrl(runner.profile_image_url);
   const label = escapeAttr(`${runner.display_name || "Runner"} profile photo`);
   const fallback = escapeHtml(initials(runner.display_name));
-  const image = imageUrl ? `<img src="${escapeAttr(imageUrl)}" alt="${label}" loading="lazy">` : fallback;
-  return `<span class="avatar avatar-${size} ${teamClass(runner.team)}">${image}</span>`;
+  const image = imageUrl
+    ? `<img src="${escapeAttr(imageUrl)}" alt="${label}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span hidden>${fallback}</span>`
+    : fallback;
+  return `<span class="avatar avatar-${size} ${teamClass(runner.team)}" aria-label="${label}">${image}</span>`;
 }
 
 function runnerIdentity(runner, options = {}) {
