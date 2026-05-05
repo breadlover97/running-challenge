@@ -178,23 +178,21 @@ function dailyDistancesByTeam(data, team) {
   return dailyTotals;
 }
 
-function last30DayCumulativeSeries(data, team) {
+function cumulativeSeries(data, team) {
   const start = parseLocalDate(data.challenge?.start_date);
   const end = parseLocalDate(data.challenge?.end_date);
   if (!start || !end) return [];
 
   const generated = parseLocalDate(String(data.generated_at || "").slice(0, 10)) || new Date();
   const windowEnd = generated < start ? start : generated > end ? end : generated;
-  const naturalStart = addDays(windowEnd, -29);
-  const windowStart = naturalStart < start ? start : naturalStart;
-  const visibleDays = Math.max(daysBetween(windowStart, windowEnd), 1);
+  const visibleDays = Math.max(daysBetween(start, windowEnd), 1);
   const dailyTotals = dailyDistancesByTeam(data, team);
 
   const series = [];
   let cumulative = 0;
-  const elapsedDays = daysBetween(windowStart, windowEnd);
+  const elapsedDays = daysBetween(start, windowEnd);
   for (let offset = 0; offset <= elapsedDays; offset += 1) {
-    const day = dateKey(addDays(windowStart, offset));
+    const day = dateKey(addDays(start, offset));
     cumulative += Number(dailyTotals[day] || 0);
     series.push({
       x: offset / visibleDays,
@@ -202,7 +200,7 @@ function last30DayCumulativeSeries(data, team) {
       date: day,
     });
   }
-  return series.length ? series : [{ x: 0, y: 0, date: dateKey(windowStart) }];
+  return series.length ? series : [{ x: 0, y: 0, date: dateKey(start) }];
 }
 
 function chartScale(value) {
@@ -225,8 +223,8 @@ function renderTeamComparisonChart(data) {
   const container = document.getElementById("teamComparisonChart");
   if (!container) return;
 
-  const teamA = last30DayCumulativeSeries(data, "Team A");
-  const teamB = last30DayCumulativeSeries(data, "Team B");
+  const teamA = cumulativeSeries(data, "Team A");
+  const teamB = cumulativeSeries(data, "Team B");
   const width = 360;
   const height = 196;
   const left = 38;
@@ -246,7 +244,7 @@ function renderTeamComparisonChart(data) {
   const endLabel = shortDate(latest.date);
 
   container.innerHTML = `
-    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Team A and Team B cumulative mileage over the last 30 days">
+    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Team A and Team B cumulative mileage">
       <line class="chart-grid" x1="${left}" y1="${top}" x2="${width - right}" y2="${top}"></line>
       <line class="chart-grid" x1="${left}" y1="${top + plotHeight / 2}" x2="${width - right}" y2="${top + plotHeight / 2}"></line>
       <line class="chart-today" x1="${width - right}" y1="${top}" x2="${width - right}" y2="${baseline}"></line>
