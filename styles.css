@@ -409,25 +409,29 @@ main {
 
 .runner-count {
   display: inline-flex;
-  gap: 6px;
+  gap: 7px;
   align-items: center;
   color: var(--muted);
   font-weight: 900;
 }
 
 .runner-icon {
-  width: 28px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   overflow: visible;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2;
+  flex: 0 0 auto;
 }
 
-.runner-speed-line {
-  opacity: 0.55;
+.runner-icon-head {
+  fill: #f2b28d;
+}
+
+.runner-icon-body {
+  fill: var(--orange);
+}
+
+.runner-icon-limb {
+  fill: #1d1d1f;
 }
 
 .team-total-row > div > span {
