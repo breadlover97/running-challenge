@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch privacy-safe Strava activity data for the mileage challenge."""
+"""Fetch privacy-safe Strava activity data for the 2026 Run Challenge."""
 
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ import requests
 
 
 STRAVA_TOKEN_URL = "https://www.strava.com/oauth/token"
+STRAVA_ATHLETE_URL = "https://www.strava.com/api/v3/athlete"
 STRAVA_ACTIVITIES_URL = "https://www.strava.com/api/v3/athlete/activities"
 PER_PAGE = 200
 
@@ -76,6 +77,14 @@ def challenge_window(config: dict[str, Any]) -> tuple[ZoneInfo, date, date, int,
     # Strava's before parameter is exclusive, so use the start of the next local day.
     end_exclusive = datetime.combine(end + timedelta(days=1), dt_time.min, tzinfo=tz)
     return tz, start, end, int(start_dt.timestamp()), int(end_exclusive.timestamp())
+
+
+def challenge_name(config: dict[str, Any]) -> str:
+    name = str(config.get("challenge_name") or "").strip()
+    legacy_name = " ".join(["Mileage", "Challenge"])
+    if not name or name == legacy_name:
+        return "2026 Run Challenge"
+    return name
 
 
 def refresh_access_token(
@@ -136,6 +145,27 @@ def get_activities_page(
     return payload
 
 
+def profile_image_from_athlete(athlete: dict[str, Any] | None) -> str:
+    if not isinstance(athlete, dict):
+        return ""
+    for field in ("profile_medium", "profile"):
+        value = athlete.get(field)
+        if isinstance(value, str) and value.startswith("https://"):
+            return value
+    return ""
+
+
+def fetch_profile_image(session: requests.Session, access_token: str) -> str:
+    response = session.get(
+        STRAVA_ATHLETE_URL,
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=30,
+    )
+    if response.status_code != 200:
+        return ""
+    return profile_image_from_athlete(response.json())
+
+
 def iso_now(tz: ZoneInfo) -> str:
     return datetime.now(tz).replace(microsecond=0).isoformat()
 
@@ -171,6 +201,7 @@ def sanitize_activity(
         "elapsed_time_seconds": int(activity.get("elapsed_time") or 0),
         "type": activity_type,
         "team": participant.get("team", "Team A"),
+        "profile_image_url": participant.get("profile_image_url", ""),
         "is_manual": bool(activity.get("manual", False)),
         "strava_activity_url": f"https://www.strava.com/activities/{activity_id}" if activity_id else "",
         "visibility": activity.get("visibility"),
@@ -199,7 +230,7 @@ def fetch_for_participant(
     start: date,
     end: date,
     synced_at: str,
-) -> tuple[list[dict[str, Any]], dict[str, int], str | None]:
+) -> tuple[list[dict[str, Any]], dict[str, int], str | None, str]:
     token_payload = refresh_access_token(
         session,
         client_id,
@@ -216,6 +247,12 @@ def fetch_for_participant(
 
     refreshed_token = token_payload.get("refresh_token")
     access_token = token_payload["access_token"]
+    profile_image_url = (
+        participant.get("profile_image_url", "")
+        or profile_image_from_athlete(token_payload.get("athlete"))
+        or fetch_profile_image(session, access_token)
+    )
+    participant_for_output = {**participant, "profile_image_url": profile_image_url}
     include_manual = bool(participant.get("include_manual_activities", False))
     included: list[dict[str, Any]] = []
     counts = {
@@ -249,14 +286,14 @@ def fetch_for_participant(
                 counts["excluded_out_of_range_activities"] += 1
                 continue
 
-            included.append(sanitize_activity(activity, participant, synced_at))
+            included.append(sanitize_activity(activity, participant_for_output, synced_at))
 
         if len(page_items) < PER_PAGE:
             break
         page += 1
         time.sleep(0.25)
 
-    return included, counts, refreshed_token
+    return included, counts, refreshed_token, profile_image_url
 
 
 def secure_write_json(path: Path, payload: dict[str, Any], secret: bool = False) -> None:
@@ -296,7 +333,7 @@ def main() -> int:
         synced_at = iso_now(tz)
         output: dict[str, Any] = {
             "challenge": {
-                "name": config.get("challenge_name", "Mileage Challenge"),
+                "name": challenge_name(config),
                 "start_date": start.isoformat(),
                 "end_date": end.isoformat(),
                 "timezone": config.get("timezone", "Asia/Singapore"),
@@ -309,6 +346,7 @@ def main() -> int:
                     "display_name": participant.get("display_name"),
                     "strava_athlete_id": str(participant.get("strava_athlete_id", "")),
                     "team": participant.get("team", "Team A"),
+                    "profile_image_url": participant.get("profile_image_url", ""),
                     "include_manual_activities": bool(participant.get("include_manual_activities", False)),
                 }
                 for participant in participants
@@ -338,7 +376,7 @@ def main() -> int:
         for index, participant in enumerate(participants):
             display_name = participant.get("display_name", f"Participant {index + 1}")
             try:
-                activities, counts, refreshed_token = fetch_for_participant(
+                activities, counts, refreshed_token, profile_image_url = fetch_for_participant(
                     session,
                     participant,
                     client_id,
@@ -350,6 +388,7 @@ def main() -> int:
                     synced_at,
                 )
                 output["activities"].extend(activities)
+                output["participants"][index]["profile_image_url"] = profile_image_url
                 for key, value in counts.items():
                     output["validation_summary"][key] += value
 

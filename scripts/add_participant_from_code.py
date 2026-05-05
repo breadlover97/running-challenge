@@ -66,6 +66,15 @@ def display_name_from_payload(payload: dict[str, Any], requested_name: str | Non
     return inferred_name or f"Strava Athlete {athlete.get('id')}"
 
 
+def profile_image_from_payload(payload: dict[str, Any]) -> str:
+    athlete = payload.get("athlete", {})
+    for key in ("profile_medium", "profile"):
+        value = athlete.get(key)
+        if isinstance(value, str) and value.startswith("https://"):
+            return value
+    return ""
+
+
 def upsert_participant(config: dict[str, Any], participant: dict[str, Any]) -> str:
     participants = config.setdefault("participants", [])
     athlete_id = participant["strava_athlete_id"]
@@ -99,6 +108,7 @@ def main() -> int:
             "strava_athlete_id": athlete_id,
             "strava_refresh_token": token_payload["refresh_token"],
             "team": args.team,
+            "profile_image_url": profile_image_from_payload(token_payload),
             "include_manual_activities": bool(args.include_manual_activities),
         }
         action = upsert_participant(config, participant)

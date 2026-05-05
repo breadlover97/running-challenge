@@ -1,12 +1,12 @@
 {
   "challenge": {
-    "name": "Mileage Challenge",
+    "name": "2026 Run Challenge",
     "start_date": "2026-05-04",
     "end_date": "2026-12-31",
     "timezone": "Asia/Singapore",
     "website_url": "https://breadlover97.github.io/running-challenge/"
   },
-  "generated_at": "2026-05-05T08:00:25+08:00",
+  "generated_at": "2026-05-05T13:12:01+08:00",
   "team_summary": {
     "Team A": {
       "team": "Team A",
@@ -17,6 +17,7 @@
         {
           "rank": 1,
           "display_name": "Ngim Tai Zhi",
+          "profile_image_url": "",
           "total_distance_km": 10.8,
           "distance_added_today_km": 0.0,
           "total_runs": 1,
@@ -35,10 +36,11 @@
   "leaderboard": [
     {
       "rank": 1,
-      "rank_change": 0,
+      "rank_change": null,
       "athlete_id": "17712235",
       "display_name": "Ngim Tai Zhi",
       "team": "Team A",
+      "profile_image_url": "",
       "total_distance_km": 10.8,
       "distance_added_today_km": 0.0,
       "total_runs": 1,
@@ -52,8 +54,7 @@
         "distance_km": 10.8,
         "strava_activity_url": "https://www.strava.com/activities/18373935753"
       },
-      "source_label": "Strava App",
-      "last_synced_at": "2026-05-05T08:00:25+08:00",
+      "last_synced_at": "2026-05-05T13:12:01+08:00",
       "activities": [
         {
           "activity_id": "18373935753",
@@ -62,7 +63,6 @@
           "distance_km": 10.8,
           "moving_time_seconds": 3332,
           "elapsed_time_seconds": 3758,
-          "source_label": "Strava App",
           "team": "Team A",
           "is_manual": false,
           "strava_activity_url": "https://www.strava.com/activities/18373935753",
@@ -76,7 +76,7 @@
     "17712235": {
       "display_name": "Ngim Tai Zhi",
       "team": "Team A",
-      "source_label": "Strava App",
+      "profile_image_url": "",
       "activities": [
         {
           "activity_id": "18373935753",
@@ -85,7 +85,6 @@
           "distance_km": 10.8,
           "moving_time_seconds": 3332,
           "elapsed_time_seconds": 3758,
-          "source_label": "Strava App",
           "team": "Team A",
           "is_manual": false,
           "strava_activity_url": "https://www.strava.com/activities/18373935753",

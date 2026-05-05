@@ -1,6 +1,6 @@
-# Mileage Challenge
+# 2026 Run Challenge
 
-Static team mileage challenge dashboard with Strava as the source of truth, GitHub Pages for the website, GitHub Actions for scheduled syncs, Cloudflare Workers for one-step participant signup, and Telegram for daily updates.
+Static team running dashboard with Strava as the source of truth, GitHub Pages for the website, GitHub Actions for scheduled syncs, Cloudflare Workers for one-step participant signup, and Telegram for daily updates.
 
 Challenge period: **4 May 2026 to 31 December 2026**  
 Timezone: **Asia/Singapore**
@@ -55,12 +55,13 @@ running-challenge/
 ## Private Config
 
 `PARTICIPANT_CONFIG_JSON` is stored as a GitHub repository secret. Do not commit real refresh tokens.
+`profile_image_url` is optional; the one-step join flow fills it from Strava when available, and the website falls back to initials when it is blank.
 
 Shape:
 
 ```json
 {
-  "challenge_name": "Mileage Challenge",
+  "challenge_name": "2026 Run Challenge",
   "challenge_start_date": "2026-05-04",
   "challenge_end_date": "2026-12-31",
   "timezone": "Asia/Singapore",
@@ -72,6 +73,7 @@ Shape:
       "strava_athlete_id": "123456",
       "strava_refresh_token": "REFRESH_TOKEN_HERE",
       "team": "Team A",
+      "profile_image_url": "https://example.com/profile.jpg",
       "include_manual_activities": false
     }
   ]
@@ -105,7 +107,7 @@ Cloudflare Worker variables:
 
 ## Main Workflows
 
-- [Daily Mileage Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml): fetches Strava runs, rebuilds `data/leaderboard.json`, sends Telegram, and commits the public JSON.
+- [Daily 2026 Run Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml): fetches Strava runs, rebuilds `data/leaderboard.json`, sends Telegram, and commits the public JSON.
 - [Add Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml): exchanges the Strava authorization code, updates the private participant config, and refreshes the leaderboard.
 - [Update Participant Team](https://github.com/breadlover97/running-challenge/actions/workflows/update_team.yml): changes Team A/B assignment and refreshes the leaderboard.
 - [Remove Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/remove_participant.yml): removes a participant token from the private config and refreshes the leaderboard.
@@ -187,7 +189,7 @@ Open `http://localhost:8000`.
 ## Privacy Notes
 
 - Participants should consent before joining.
-- The public site shows names, teams, mileage totals, daily mileage, run counts, and Strava validation links.
+- The public site shows names, teams, profile photos or initials, mileage totals, daily mileage, run counts, and Strava validation links.
 - Telegram may mention daily mileage and leaderboard rank.
 - The scripts intentionally avoid GPS maps, exact start/end locations, coordinates, heart rate, cadence, power, and detailed sensor data.
 - A participant can leave by asking the organiser to run the remove-participant workflow.
