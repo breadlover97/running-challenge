@@ -2,7 +2,7 @@ const DATA_URL = "data/leaderboard.json";
 const STRAVA_CLIENT_ID = "235397";
 const STRAVA_REDIRECT_URI = "https://breadlover97.github.io/running-challenge/";
 const STRAVA_SCOPE = "read,activity:read_all";
-const JOIN_WORKER_START_URL = "";
+const JOIN_WORKER_START_URL = "https://running-challenge-join.ngimtaizhi.workers.dev/start";
 
 const formatDate = new Intl.DateTimeFormat("en-SG", {
   day: "numeric",
