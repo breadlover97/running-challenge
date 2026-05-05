@@ -6,23 +6,14 @@
     "timezone": "Asia/Singapore",
     "website_url": "https://breadlover97.github.io/running-challenge/"
   },
-  "generated_at": "2026-05-05T11:25:15+08:00",
+  "generated_at": "2026-05-05T12:29:50+08:00",
   "team_summary": {
     "Team A": {
       "team": "Team A",
-      "total_distance_km": 10.8,
-      "total_runs": 1,
-      "participant_count": 1,
-      "participants": [
-        {
-          "rank": 1,
-          "display_name": "Ngim Tai Zhi",
-          "total_distance_km": 10.8,
-          "distance_added_today_km": 0.0,
-          "total_runs": 1,
-          "latest_activity_date": "2026-05-04"
-        }
-      ]
+      "total_distance_km": 0.0,
+      "total_runs": 0,
+      "participant_count": 0,
+      "participants": []
     },
     "Team B": {
       "team": "Team B",
@@ -32,69 +23,8 @@
       "participants": []
     }
   },
-  "leaderboard": [
-    {
-      "rank": 1,
-      "rank_change": 0,
-      "athlete_id": "17712235",
-      "display_name": "Ngim Tai Zhi",
-      "team": "Team A",
-      "total_distance_km": 10.8,
-      "distance_added_today_km": 0.0,
-      "total_runs": 1,
-      "latest_activity_date": "2026-05-04",
-      "daily_distance_km": {
-        "2026-05-04": 10.8
-      },
-      "longest_run": {
-        "date": "2026-05-04",
-        "activity_name": "Evening Run",
-        "distance_km": 10.8,
-        "strava_activity_url": "https://www.strava.com/activities/18373935753"
-      },
-      "source_label": "Garmin → Strava",
-      "last_synced_at": "2026-05-05T11:25:15+08:00",
-      "activities": [
-        {
-          "activity_id": "18373935753",
-          "date": "2026-05-04",
-          "activity_name": "Evening Run",
-          "distance_km": 10.8,
-          "moving_time_seconds": 3332,
-          "elapsed_time_seconds": 3758,
-          "source_label": "Garmin → Strava",
-          "team": "Team A",
-          "is_manual": false,
-          "strava_activity_url": "https://www.strava.com/activities/18373935753",
-          "visibility": "everyone",
-          "is_private": false
-        }
-      ]
-    }
-  ],
-  "participants": {
-    "17712235": {
-      "display_name": "Ngim Tai Zhi",
-      "team": "Team A",
-      "source_label": "Garmin → Strava",
-      "activities": [
-        {
-          "activity_id": "18373935753",
-          "date": "2026-05-04",
-          "activity_name": "Evening Run",
-          "distance_km": 10.8,
-          "moving_time_seconds": 3332,
-          "elapsed_time_seconds": 3758,
-          "source_label": "Garmin → Strava",
-          "team": "Team A",
-          "is_manual": false,
-          "strava_activity_url": "https://www.strava.com/activities/18373935753",
-          "visibility": "everyone",
-          "is_private": false
-        }
-      ]
-    }
-  },
+  "leaderboard": [],
+  "participants": {},
   "daily_summary": {
     "date": "2026-05-05",
     "total_distance_km": 0.0,
@@ -104,7 +34,7 @@
   },
   "validation_summary": {
     "source": "Strava API",
-    "included_activities": 1,
+    "included_activities": 0,
     "excluded_manual_activities": 0,
     "excluded_non_run_activities": 0,
     "excluded_out_of_range_activities": 0,
