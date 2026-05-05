@@ -8,6 +8,11 @@ const formatDate = new Intl.DateTimeFormat("en-SG", {
   year: "numeric"
 });
 
+const formatShortDate = new Intl.DateTimeFormat("en-SG", {
+  day: "numeric",
+  month: "short"
+});
+
 const formatDateTime = new Intl.DateTimeFormat("en-SG", {
   day: "numeric",
   month: "short",
@@ -51,6 +56,11 @@ function parseLocalDate(value) {
 function prettyDate(value) {
   const date = /^\d{4}-\d{2}-\d{2}$/.test(String(value || "")) ? parseLocalDate(value) : parseDate(value);
   return date ? formatDate.format(date) : "-";
+}
+
+function shortDate(value) {
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(String(value || "")) ? parseLocalDate(value) : parseDate(value);
+  return date ? formatShortDate.format(date) : "-";
 }
 
 function prettyDateTime(value) {
@@ -189,33 +199,64 @@ function cumulativeTeamSeries(data, team) {
   return series.length ? series : [{ x: 0, y: 0, date: dateKey(start) }];
 }
 
+function chartScale(value) {
+  const max = Number(value || 0);
+  if (max <= 5) return 5;
+  if (max <= 20) return Math.ceil(max / 5) * 5;
+  if (max <= 100) return Math.ceil(max / 10) * 10;
+  return Math.ceil(max / 25) * 25;
+}
+
 function renderTeamChart(elementId, data, team) {
   const container = document.getElementById(elementId);
   if (!container) return;
 
   const series = cumulativeTeamSeries(data, team);
-  const width = 320;
-  const height = 104;
-  const padding = 12;
-  const maxDistance = Math.max(...series.map((point) => point.y), 1);
+  const width = 360;
+  const height = 138;
+  const left = 42;
+  const right = 14;
+  const top = 14;
+  const bottom = 32;
+  const plotWidth = width - left - right;
+  const plotHeight = height - top - bottom;
+  const baseline = height - bottom;
+  const maxDistance = chartScale(Math.max(...series.map((point) => point.y), 0));
   const points = series.map((point) => {
-    const x = padding + point.x * (width - padding * 2);
-    const y = height - padding - (point.y / maxDistance) * (height - padding * 2);
+    const x = left + point.x * plotWidth;
+    const y = baseline - (point.y / maxDistance) * plotHeight;
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(" ");
   const latest = series[series.length - 1] || { y: 0, date: "" };
-  const latestPoint = points.split(" ").pop()?.split(",") || [padding, height - padding];
-  const color = team === "Team B" ? "var(--team-b)" : "var(--team-a)";
-  const label = latest.y > 0 ? `${km(latest.y)} by ${prettyDate(latest.date)}` : "No distance logged yet";
+  const latestPoint = points.split(" ").pop()?.split(",") || [left, baseline];
+  const color = team === "Team B" ? "#007c89" : "#fc4c02";
+  const gradientId = `${elementId}Gradient`;
+  const areaPoints = `${left},${baseline} ${points} ${latestPoint[0]},${baseline}`;
+  const startLabel = shortDate(data.challenge?.start_date);
+  const endLabel = shortDate(data.challenge?.end_date);
 
   container.innerHTML = `
-    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeAttr(`${team} cumulative distance chart`)}" preserveAspectRatio="none">
-      <line class="chart-axis" x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}"></line>
-      <line class="chart-axis" x1="${padding}" y1="${padding}" x2="${padding}" y2="${height - padding}"></line>
+    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeAttr(`${team} cumulative distance over the challenge period`)}">
+      <defs>
+        <linearGradient id="${gradientId}" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="${color}" stop-opacity="0.2"></stop>
+          <stop offset="100%" stop-color="${color}" stop-opacity="0.02"></stop>
+        </linearGradient>
+      </defs>
+      <line class="chart-grid" x1="${left}" y1="${top}" x2="${width - right}" y2="${top}"></line>
+      <line class="chart-grid" x1="${left}" y1="${top + plotHeight / 2}" x2="${width - right}" y2="${top + plotHeight / 2}"></line>
+      <line class="chart-today" x1="${latestPoint[0]}" y1="${top}" x2="${latestPoint[0]}" y2="${baseline}"></line>
+      <line class="chart-axis" x1="${left}" y1="${baseline}" x2="${width - right}" y2="${baseline}"></line>
+      <line class="chart-axis" x1="${left}" y1="${top}" x2="${left}" y2="${baseline}"></line>
+      <polygon class="chart-area" fill="url(#${gradientId})" points="${areaPoints}"></polygon>
       <polyline class="chart-line" style="stroke: ${color}" points="${points}"></polyline>
       <circle class="chart-dot" style="fill: ${color}" cx="${latestPoint[0]}" cy="${latestPoint[1]}" r="4"></circle>
+      <text class="chart-label chart-y-max" x="0" y="${top + 4}">${maxDistance.toFixed(maxDistance < 10 ? 1 : 0)} km</text>
+      <text class="chart-label chart-y-zero" x="18" y="${baseline + 4}">0</text>
+      <text class="chart-label chart-x-start" x="${left}" y="${height - 8}">${escapeHtml(startLabel)}</text>
+      <text class="chart-label chart-x-end" x="${width - right}" y="${height - 8}">${escapeHtml(endLabel)}</text>
+      <text class="chart-label chart-today-label" x="${latestPoint[0]}" y="${top - 4}">Today</text>
     </svg>
-    <span>${escapeHtml(label)}</span>
   `;
 }
 
