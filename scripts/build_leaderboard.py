@@ -37,6 +37,14 @@ def team_name(value: Any) -> str:
     return "Team B" if value == "Team B" else "Team A"
 
 
+def challenge_name(value: Any) -> str:
+    name = str(value or "").strip()
+    legacy_name = " ".join(["Mileage", "Challenge"])
+    if not name or name == legacy_name:
+        return "2026 Run Challenge"
+    return name
+
+
 def generated_date(generated_at: str | None, timezone_name: str, override: str | None) -> str:
     if override:
         return override
@@ -89,6 +97,7 @@ def build_leaderboard(raw: dict[str, Any], previous: dict[str, Any], today: str)
             "athlete_id": athlete_id,
             "display_name": participant.get("display_name", "Unknown runner"),
             "team": team_name(participant.get("team")),
+            "profile_image_url": participant.get("profile_image_url", ""),
             "total_distance_raw": 0.0,
             "total_runs": 0,
             "latest_activity_date": None,
@@ -106,6 +115,7 @@ def build_leaderboard(raw: dict[str, Any], previous: dict[str, Any], today: str)
                 "athlete_id": athlete_id,
                 "display_name": activity.get("athlete_display_name", "Unknown runner"),
                 "team": team_name(activity.get("team")),
+                "profile_image_url": activity.get("profile_image_url", ""),
                 "total_distance_raw": 0.0,
                 "total_runs": 0,
                 "latest_activity_date": None,
@@ -159,6 +169,7 @@ def build_leaderboard(raw: dict[str, Any], previous: dict[str, Any], today: str)
                 "athlete_id": runner["athlete_id"],
                 "display_name": runner["display_name"],
                 "team": runner["team"],
+                "profile_image_url": runner["profile_image_url"],
                 "total_distance_km": one_decimal(runner["total_distance_raw"]),
                 "distance_added_today_km": one_decimal(runner["distance_added_today_raw"]),
                 "total_runs": runner["total_runs"],
@@ -204,6 +215,7 @@ def build_leaderboard(raw: dict[str, Any], previous: dict[str, Any], today: str)
                         "rank": row["rank"],
                         "display_name": row["display_name"],
                         "total_distance_km": row["total_distance_km"],
+                        "profile_image_url": row.get("profile_image_url", ""),
                         "distance_added_today_km": row["distance_added_today_km"],
                         "total_runs": row["total_runs"],
                         "latest_activity_date": row["latest_activity_date"],
@@ -218,6 +230,7 @@ def build_leaderboard(raw: dict[str, Any], previous: dict[str, Any], today: str)
         row["athlete_id"]: {
             "display_name": row["display_name"],
             "team": row["team"],
+            "profile_image_url": row.get("profile_image_url", ""),
             "activities": row["activities"],
         }
         for row in rows
@@ -225,7 +238,7 @@ def build_leaderboard(raw: dict[str, Any], previous: dict[str, Any], today: str)
 
     return {
         "challenge": {
-            "name": challenge.get("name", "Mileage Challenge"),
+            "name": challenge_name(challenge.get("name")),
             "start_date": challenge.get("start_date", "2026-05-04"),
             "end_date": challenge.get("end_date", "2026-12-31"),
             "timezone": challenge.get("timezone", "Asia/Singapore"),

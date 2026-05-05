@@ -4,26 +4,33 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light">
-    <title>Mileage Challenge</title>
+    <title>2026 Run Challenge</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
+    <nav class="top-nav" aria-label="Challenge navigation">
+      <a class="site-mark" href="index.html">2026 Run Challenge</a>
+      <div class="nav-tabs" aria-label="Page sections">
+        <a href="#teams">Teams</a>
+        <a href="#leaderboard">Leaderboard</a>
+        <a href="#insights">Insights</a>
+        <a href="#activities">Activities</a>
+      </div>
+      <div class="nav-actions">
+        <a id="joinStravaLink" class="primary-action compact-action strava-join-link" href="https://running-challenge-join.ngimtaizhi.workers.dev/start">Sign in with Strava</a>
+        <a class="secondary-action compact-action" href="join.html">Setup steps</a>
+      </div>
+    </nav>
+
     <header class="site-header">
-      <nav class="top-nav" aria-label="Challenge actions">
-        <a class="site-mark" href="index.html">Mileage Challenge</a>
-        <div class="nav-actions">
-          <a id="joinStravaLink" class="primary-action compact-action strava-join-link" href="https://running-challenge-join.ngimtaizhi.workers.dev/start">Sign in with Strava</a>
-          <a class="secondary-action compact-action" href="join.html">Setup steps</a>
-        </div>
-      </nav>
       <div class="header-copy">
-        <h1 id="challengeName">Mileage Challenge</h1>
-        <p id="challengeDates" class="date-range">4 May 2026 to 31 December 2026</p>
+        <p class="challenge-kicker">Team distance, Strava verified</p>
+        <p class="date-range"><span id="challengeDates">4 May 2026 to 31 December 2026</span><span id="challengeCountdown" class="countdown-pill">Day 1 of 242</span></p>
       </div>
     </header>
 
     <main>
-      <section id="teamSummary" class="team-summary" aria-label="Team totals">
+      <section id="teams" class="team-summary anchor-section" aria-label="Team totals">
         <div class="team-card team-a">
           <span class="summary-label">Team A</span>
           <strong id="teamADistance">0.0 km</strong>
@@ -62,7 +69,7 @@
         <div id="teamBreakdown" class="team-breakdown"></div>
       </section>
 
-      <section class="panel">
+      <section id="leaderboard" class="panel anchor-section">
         <div class="section-heading">
           <h2>Leaderboard</h2>
           <p id="syncStatus">Reading latest challenge data...</p>
@@ -87,7 +94,15 @@
         <div id="emptyState" class="empty-state" hidden>No runs have been logged for this challenge yet.</div>
       </section>
 
-      <section class="panel">
+      <section id="insights" class="panel anchor-section">
+        <div class="section-heading">
+          <h2>Insights</h2>
+          <p>Quick patterns from the latest Strava sync.</p>
+        </div>
+        <div id="insightsGrid" class="insights-grid"></div>
+      </section>
+
+      <section id="activities" class="panel anchor-section">
         <div class="section-heading">
           <h2>Activity Validation</h2>
           <p>Recent Strava activity links for checking counted mileage.</p>
@@ -109,10 +124,11 @@
     </main>
 
     <footer class="site-footer">
-      <span>Privacy-conscious mileage challenge dashboard</span>
+      <span>Privacy-conscious 2026 Run Challenge dashboard</span>
       <a href="https://www.strava.com/" target="_blank" rel="noreferrer">Powered by Strava data</a>
     </footer>
 
+    <button id="returnTop" class="return-top" type="button" aria-label="Return to top">↑</button>
     <script src="app.js"></script>
   </body>
 </html>

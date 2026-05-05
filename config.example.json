@@ -1,5 +1,5 @@
 {
-  "challenge_name": "Mileage Challenge",
+  "challenge_name": "2026 Run Challenge",
   "challenge_start_date": "2026-05-04",
   "challenge_end_date": "2026-12-31",
   "timezone": "Asia/Singapore",
@@ -11,6 +11,7 @@
       "strava_athlete_id": "123456",
       "strava_refresh_token": "REFRESH_TOKEN_HERE",
       "team": "Team A",
+      "profile_image_url": "https://example.com/profile.jpg",
       "include_manual_activities": false
     }
   ]

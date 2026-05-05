@@ -43,7 +43,7 @@ You do not need to use terminal, copy a code, or create any GitHub/Cloudflare ac
 
 By joining, you agree that:
 
-- Your display name, team, total distance, run count, and recent activity links may appear on the website.
+- Your display name, team, profile photo or initials, total distance, run count, and recent activity links may appear on the website.
 - Your daily mileage may be posted in the Telegram group.
 - GPS maps, exact start/end locations, coordinates, heart rate, cadence, and power will not be displayed.
 - You can leave by asking the organiser to remove you from the challenge.

@@ -180,7 +180,7 @@ async function completeJoin(request, env) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Joined Mileage Challenge</title>
+    <title>Joined 2026 Run Challenge</title>
     ${style()}
   </head>
   <body>
@@ -353,7 +353,7 @@ function page(title, message, env, status = 200) {
   </head>
   <body>
     <main class="card">
-      <p class="eyebrow">Mileage Challenge</p>
+      <p class="eyebrow">2026 Run Challenge</p>
       <h1>${escapeHtml(title)}</h1>
       <p>${escapeHtml(message)}</p>
       <a class="button" href="${escapeHtml(env.CHALLENGE_SITE_URL || "/")}">Back to challenge</a>

@@ -1,6 +1,6 @@
 {
   "challenge": {
-    "name": "Mileage Challenge",
+    "name": "2026 Run Challenge",
     "start_date": "2026-05-04",
     "end_date": "2026-12-31",
     "timezone": "Asia/Singapore",
@@ -17,6 +17,7 @@
         {
           "rank": 1,
           "display_name": "Ngim Tai Zhi",
+          "profile_image_url": "",
           "total_distance_km": 10.8,
           "distance_added_today_km": 0.0,
           "total_runs": 1,
@@ -39,6 +40,7 @@
       "athlete_id": "17712235",
       "display_name": "Ngim Tai Zhi",
       "team": "Team A",
+      "profile_image_url": "",
       "total_distance_km": 10.8,
       "distance_added_today_km": 0.0,
       "total_runs": 1,
@@ -74,6 +76,7 @@
     "17712235": {
       "display_name": "Ngim Tai Zhi",
       "team": "Team A",
+      "profile_image_url": "",
       "activities": [
         {
           "activity_id": "18373935753",

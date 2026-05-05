@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Send the daily mileage challenge update to Telegram."""
+"""Send the daily 2026 Run Challenge update to Telegram."""
 
 from __future__ import annotations
 
@@ -57,7 +57,7 @@ def build_message(data: dict[str, Any]) -> str:
     website_url = challenge.get("website_url") or ""
 
     lines = [
-        f"🏃 <b>{e(challenge.get('name', 'Mileage Challenge'))} Daily Update</b>",
+        f"🏃 <b>{e(challenge.get('name', '2026 Run Challenge'))} Daily Update</b>",
         f"Date: {e(format_date(daily.get('date')))}",
         "",
         "<b>Team totals:</b>",
