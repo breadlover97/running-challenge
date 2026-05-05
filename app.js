@@ -89,13 +89,7 @@ function duration(seconds) {
 }
 
 function runnerIcon() {
-  return `
-    <svg class="runner-icon" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
-      <circle class="runner-icon-head" cx="16.5" cy="5.2" r="3.1"></circle>
-      <path class="runner-icon-body" d="M13.2 9.1c1-.9 2.5-1 3.7-.3l3.5 2.1 3.5-.8c1-.2 1.9.4 2.1 1.3.2.9-.4 1.8-1.3 2.1l-4.3 1c-.5.1-1 .1-1.5-.2l-1.4-.8-2 3.4 3.5 2.8c.7.6.9 1.7.3 2.5-.6.8-1.7.9-2.5.3L12 18.7c-.9-.7-1.1-1.9-.5-2.9l1.6-2.7-2.1 1.5-1.6 3.1c-.5.9-1.5 1.2-2.4.8-.8-.5-1.2-1.5-.7-2.4l1.8-3.5c.1-.3.4-.6.7-.8l4.4-2.7Z"></path>
-      <path class="runner-icon-limb" d="M12.3 18.6 9 22.8l-3.6 1.4c-.9.4-1.9-.1-2.3-1-.3-.9.1-1.9 1-2.2l2.7-1.1 2.9-3.7 2.6 2.4ZM16.2 12.6l-2.9-1.6-2.1-3.2c-.5-.8-.3-1.9.5-2.4.8-.5 1.9-.3 2.4.5l1.6 2.4 2.3 1.3-1.8 3Z"></path>
-    </svg>
-  `;
+  return `<span class="runner-icon" aria-hidden="true">🏃🏻</span>`;
 }
 
 function runnerCountMarkup(count) {
