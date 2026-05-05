@@ -90,9 +90,10 @@ function duration(seconds) {
 
 function runnerIcon() {
   return `
-    <svg class="runner-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <circle cx="13" cy="4" r="2.1"></circle>
-      <path d="M10 8.2l4 2.1 3.2-1.9M14 10.3l-3 4 4 3.2M11 14.3l-4.2 1.4-2 3.7M15 17.5l2.5 3.2M10 8.2l-2.4 3.2"></path>
+    <svg class="runner-icon" viewBox="0 0 28 20" aria-hidden="true" focusable="false">
+      <path class="runner-speed-line" d="M1.5 5.5h5M3 10h4"></path>
+      <circle cx="15.5" cy="3.7" r="2.1"></circle>
+      <path d="M13.7 7.4l4.1 2.1 3.8-1.6M17.8 9.5l-3.9 4.2 4.5 3.5M13.9 13.7l-4.8.9-3.3 3.4M18.4 17.2h5.1M13.7 7.4l-3.2 3.3"></path>
     </svg>
   `;
 }
