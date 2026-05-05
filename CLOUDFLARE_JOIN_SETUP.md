@@ -108,7 +108,9 @@ GITHUB_WORKFLOW_TOKEN=your GitHub token from step 2
 STATE_SIGNING_SECRET=any long random text
 ```
 
-8. Deploy the Worker.
+8. Save the variables and secrets, then deploy the Worker.
+
+If Cloudflare deploys before the secrets are added, the build can still succeed. The sign-in flow will only work after both secrets exist.
 
 ### 5. Update Strava Callback Domain
 
