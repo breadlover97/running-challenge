@@ -178,7 +178,6 @@ function renderSummary(data) {
   document.getElementById("teamBMeta").textContent = `${text(teamB.participant_count, "0")} runners`;
   document.getElementById("totalRuns").textContent = String(totalRuns);
   document.getElementById("todayDistance").textContent = `${km(todayDistance)} today`;
-  document.getElementById("lastUpdated").textContent = prettyDateTime(data.generated_at);
 }
 
 function renderTeamBreakdown(data) {
@@ -363,7 +362,8 @@ loadLeaderboard()
     renderLeaderboard(data);
     renderInsights(data);
     renderActivities(data);
-    document.getElementById("syncStatus").textContent = "Synced from Strava API";
+    document.getElementById("syncStatus").textContent =
+      `Synced from Strava API, Last Updated ${prettyDateTime(data.generated_at)}`;
   })
   .catch((error) => {
     console.error(error);
