@@ -443,6 +443,65 @@ function insightCard(label, value, detail, className = "") {
   `;
 }
 
+function challengeTiming(challenge, generatedAt) {
+  const start = parseLocalDate(challenge?.start_date);
+  const end = parseLocalDate(challenge?.end_date);
+  if (!start || !end) return null;
+
+  const generatedDay = String(generatedAt || "").slice(0, 10);
+  const today = parseLocalDate(generatedDay) || new Date();
+  const clampedToday = today < start ? start : today > end ? end : today;
+  return {
+    start,
+    end,
+    today: clampedToday,
+    currentDay: daysBetween(start, clampedToday) + 1,
+    totalDays: daysBetween(start, end) + 1,
+  };
+}
+
+function projectedFinishDistance(team, timing) {
+  if (!timing || timing.currentDay <= 0) return 0;
+  return (Number(team.total_distance_km || 0) / timing.currentDay) * timing.totalDays;
+}
+
+function runningDayCount(runner) {
+  return Object.values(runner.daily_distance_km || {}).filter((distance) => Number(distance || 0) > 0).length;
+}
+
+function biggestTeamDay(data) {
+  return ["Team A", "Team B"].reduce((best, team) => {
+    const dailyTotals = dailyDistancesByTeam(data, team);
+    Object.entries(dailyTotals).forEach(([day, distance]) => {
+      const value = Number(distance || 0);
+      if (!best || value > best.distance) {
+        best = { team, date: day, distance: value };
+      }
+    });
+    return best;
+  }, null);
+}
+
+function weekStart(date) {
+  const start = new Date(date);
+  const day = start.getDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  start.setDate(start.getDate() + mondayOffset);
+  return start;
+}
+
+function activeRunnersThisWeek(leaderboard, timing, team) {
+  if (!timing) return 0;
+  const start = weekStart(timing.today);
+  const end = timing.today;
+  return leaderboard
+    .filter((runner) => teamName(runner.team) === team)
+    .filter((runner) => Object.entries(runner.daily_distance_km || {}).some(([day, distance]) => {
+      const date = parseLocalDate(day);
+      return date && date >= start && date <= end && Number(distance || 0) > 0;
+    })).length;
+}
+
 function renderInsights(data) {
   const grid = document.getElementById("insightsGrid");
   if (!grid) return;
@@ -450,44 +509,67 @@ function renderInsights(data) {
   const leaderboard = data.leaderboard || [];
   const teamA = data.team_summary?.["Team A"] || { total_distance_km: 0, total_runs: 0 };
   const teamB = data.team_summary?.["Team B"] || { total_distance_km: 0, total_runs: 0 };
+  const timing = challengeTiming(data.challenge, data.generated_at);
   const teamGap = Math.abs(Number(teamA.total_distance_km || 0) - Number(teamB.total_distance_km || 0));
   const teamADistance = Number(teamA.total_distance_km || 0);
   const teamBDistance = Number(teamB.total_distance_km || 0);
   const leadingTeam = teamBDistance > teamADistance ? "Team B" : "Team A";
-  const teamRaceValue = teamGap === 0 ? "Teams are tied" : `${leadingTeam} leads by ${km(teamGap)}`;
+  const teamGapValue = teamGap === 0 ? "Teams are tied" : `${leadingTeam} +${km(teamGap)}`;
+  const projectedA = projectedFinishDistance(teamA, timing);
+  const projectedB = projectedFinishDistance(teamB, timing);
+  const averageA = Number(teamA.participant_count || 0) ? teamADistance / Number(teamA.participant_count || 0) : 0;
+  const averageB = Number(teamB.participant_count || 0) ? teamBDistance / Number(teamB.participant_count || 0) : 0;
   const topRunner = leaderboard[0];
-  const mostRuns = [...leaderboard].sort((a, b) => Number(b.total_runs || 0) - Number(a.total_runs || 0))[0];
+  const mostConsistent = [...leaderboard].sort((a, b) => {
+    const dayGap = runningDayCount(b) - runningDayCount(a);
+    if (dayGap !== 0) return dayGap;
+    return Number(b.total_distance_km || 0) - Number(a.total_distance_km || 0);
+  })[0];
   const longestRun = leaderboard
     .map((runner) => ({ runner, run: runner.longest_run }))
     .filter((item) => item.run)
     .sort((a, b) => Number(b.run.distance_km || 0) - Number(a.run.distance_km || 0))[0];
-  const today = data.daily_summary || {};
-  const todayRunners = today.runners || [];
+  const bestTeamDay = biggestTeamDay(data);
+  const activeA = activeRunnersThisWeek(leaderboard, timing, "Team A");
+  const activeB = activeRunnersThisWeek(leaderboard, timing, "Team B");
   const totalDistance = leaderboard.reduce((sum, runner) => sum + Number(runner.total_distance_km || 0), 0);
   const totalActivities = leaderboard.reduce((sum, runner) => sum + Number(runner.total_runs || 0), 0);
 
   const cards = [
     insightCard(
-      "Team race",
-      teamRaceValue,
+      "Team gap",
+      teamGapValue,
       `Team A: ${km(teamA.total_distance_km)} · Team B: ${km(teamB.total_distance_km)}`,
       teamGap === 0 ? "" : teamClass(leadingTeam),
+    ),
+    insightCard(
+      "Projected finish distance",
+      `A ${km(projectedA)} · B ${km(projectedB)}`,
+      timing ? `Based on pace through day ${timing.currentDay} of ${timing.totalDays}.` : "Projection appears after challenge dates load.",
+    ),
+    insightCard(
+      "Average km per runner",
+      `A ${km(averageA)} · B ${km(averageB)}`,
+      "Team distance divided by assigned runners.",
     ),
     insightCard("Run distance logged", km(totalDistance), "Combined counted distance from both teams."),
     insightCard("Activity count", String(totalActivities), "Counted Strava run activities in the challenge period."),
     topRunner
       ? insightCard("Top runner", topRunner.display_name, `${km(topRunner.total_distance_km)} across ${topRunner.total_runs} runs`)
       : insightCard("Top runner", "No runs yet", "The leaderboard will update after the first Strava sync."),
-    mostRuns
-      ? insightCard("Most consistent", mostRuns.display_name, `${mostRuns.total_runs} counted runs so far`)
-      : insightCard("Most consistent", "No runs yet", "Run counts will appear after activities sync."),
+    mostConsistent
+      ? insightCard("Most consistent", mostConsistent.display_name, `${runningDayCount(mostConsistent)} running day${runningDayCount(mostConsistent) === 1 ? "" : "s"} so far`)
+      : insightCard("Most consistent", "No runs yet", "Running days will appear after activities sync."),
     longestRun
       ? insightCard("Longest run", longestRun.runner.display_name, `${km(longestRun.run.distance_km)} on ${prettyDate(longestRun.run.date)}`)
       : insightCard("Longest run", "No runs yet", "Longest run will appear after activities sync."),
+    bestTeamDay
+      ? insightCard("Biggest team day", `${bestTeamDay.team}: ${km(bestTeamDay.distance)}`, `${prettyDate(bestTeamDay.date)} had the biggest single-day team total.`)
+      : insightCard("Biggest team day", "No runs yet", "The biggest team day will appear after activities sync."),
     insightCard(
-      "Today",
-      todayRunners.length ? `${km(today.total_distance_km)} added` : "No new runs",
-      todayRunners.length ? `${todayRunners.length} runner${todayRunners.length === 1 ? "" : "s"} logged distance today.` : "The daily update will still show the current standings.",
+      "Active runners this week",
+      `A ${activeA} · B ${activeB}`,
+      "Runners with at least one counted run this week.",
     ),
   ];
 
