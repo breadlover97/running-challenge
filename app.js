@@ -228,11 +228,11 @@ function renderTeamComparisonChart(data) {
   const teamA = last30DayCumulativeSeries(data, "Team A");
   const teamB = last30DayCumulativeSeries(data, "Team B");
   const width = 360;
-  const height = 148;
-  const left = 42;
-  const right = 14;
-  const top = 18;
-  const bottom = 32;
+  const height = 196;
+  const left = 38;
+  const right = 8;
+  const top = 20;
+  const bottom = 24;
   const plotWidth = width - left - right;
   const plotHeight = height - top - bottom;
   const baseline = height - bottom;
@@ -254,8 +254,8 @@ function renderTeamComparisonChart(data) {
       <line class="chart-axis" x1="${left}" y1="${top}" x2="${left}" y2="${baseline}"></line>
       <polyline class="chart-line team-a-line" points="${teamAPoints}"></polyline>
       <polyline class="chart-line team-b-line" points="${teamBPoints}"></polyline>
-      <circle class="chart-dot team-a-dot" cx="${latestAPoint[0]}" cy="${latestAPoint[1]}" r="4"></circle>
-      <circle class="chart-dot team-b-dot" cx="${latestBPoint[0]}" cy="${latestBPoint[1]}" r="4"></circle>
+      <circle class="chart-dot team-a-dot" cx="${latestAPoint[0]}" cy="${latestAPoint[1]}" r="4.6"></circle>
+      <circle class="chart-dot team-b-dot" cx="${latestBPoint[0]}" cy="${latestBPoint[1]}" r="4.6"></circle>
       <text class="chart-label chart-y-max" x="0" y="${top + 4}">${maxDistance.toFixed(maxDistance < 10 ? 1 : 0)} km</text>
       <text class="chart-label chart-y-zero" x="18" y="${baseline + 4}">0</text>
       <text class="chart-label chart-x-start" x="${left}" y="${height - 8}">${escapeHtml(startLabel)}</text>
