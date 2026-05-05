@@ -173,7 +173,7 @@ function cumulativeTeamSeries(data, team) {
 
   const generated = parseLocalDate(String(data.generated_at || "").slice(0, 10)) || new Date();
   const chartEnd = generated < start ? start : generated > end ? end : generated;
-  const totalChallengeDays = Math.max(daysBetween(start, end), 1);
+  const visibleDays = Math.max(daysBetween(start, chartEnd), 1);
   const dailyTotals = {};
 
   (data.leaderboard || [])
@@ -191,7 +191,7 @@ function cumulativeTeamSeries(data, team) {
     const day = dateKey(addDays(start, offset));
     cumulative += Number(dailyTotals[day] || 0);
     series.push({
-      x: offset / totalChallengeDays,
+      x: offset / visibleDays,
       y: cumulative,
       date: day,
     });
@@ -233,7 +233,7 @@ function renderTeamChart(elementId, data, team) {
   const gradientId = `${elementId}Gradient`;
   const areaPoints = `${left},${baseline} ${points} ${latestPoint[0]},${baseline}`;
   const startLabel = shortDate(data.challenge?.start_date);
-  const endLabel = shortDate(data.challenge?.end_date);
+  const endLabel = shortDate(latest.date);
 
   container.innerHTML = `
     <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeAttr(`${team} cumulative distance over the challenge period`)}">
@@ -255,7 +255,7 @@ function renderTeamChart(elementId, data, team) {
       <text class="chart-label chart-y-zero" x="18" y="${baseline + 4}">0</text>
       <text class="chart-label chart-x-start" x="${left}" y="${height - 8}">${escapeHtml(startLabel)}</text>
       <text class="chart-label chart-x-end" x="${width - right}" y="${height - 8}">${escapeHtml(endLabel)}</text>
-      <text class="chart-label chart-today-label" x="${latestPoint[0]}" y="${top - 4}">Today</text>
+      <text class="chart-label chart-today-label" x="${width - right}" y="${top - 4}">Today</text>
     </svg>
   `;
 }

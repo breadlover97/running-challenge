@@ -403,7 +403,7 @@ main {
 .chart-today-label {
   fill: var(--ink);
   font-size: 0.62rem;
-  text-anchor: middle;
+  text-anchor: end;
 }
 
 .panel,
