@@ -1,96 +1,26 @@
-# Cloudflare One-Step Join Setup
+# Cloudflare Join Worker
 
-This turns participant onboarding into:
-
-```text
-Challenge website -> Sign in with Strava -> Strava approval -> choose team -> GitHub Actions -> participant added
-```
-
-Participants will not need to copy a Strava code or send anything to the organiser.
-
-## What The Worker Does
-
-- Sends participants to Strava with the correct challenge details.
-- Receives Strava's one-time authorization code at `/callback`.
-- Triggers the existing GitHub Actions workflow: `add_participant.yml`.
-- Lets GitHub Actions exchange the code for the participant refresh token and update `PARTICIPANT_CONFIG_JSON`.
-- Does not store Strava refresh tokens, GPS data, or activity data in Cloudflare.
-
-## Accounts And Access Needed
-
-You need:
-
-- A free Cloudflare account: <https://dash.cloudflare.com/sign-up>
-- Access to this GitHub repo: <https://github.com/breadlover97/running-challenge>
-- A GitHub token for the Worker with permission to trigger Actions workflows.
-- Access to your Strava API app settings.
-
-## Recommended Setup
-
-### 1. Create A Cloudflare Account
-
-1. Go to <https://dash.cloudflare.com/sign-up>.
-2. Create an account and verify your email.
-3. Open the Cloudflare dashboard.
-
-You do not need to move your domain to Cloudflare. The default `workers.dev` URL is enough.
-
-### 2. Create A GitHub Token For The Worker
-
-1. Go to <https://github.com/settings/personal-access-tokens>.
-2. Create a fine-grained token.
-3. Repository access: select only `breadlover97/running-challenge`.
-4. Repository permissions: set **Actions** to **Read and write**.
-5. Generate the token and keep it private.
-
-This token is only for triggering the `Add Strava Participant` workflow.
-
-### 3. Deploy The Worker With Wrangler
-
-If you have Node.js 22 or newer installed, run:
-
-```bash
-cd cloudflare-worker
-npm install
-npx wrangler login
-npx wrangler secret put GITHUB_WORKFLOW_TOKEN
-npx wrangler secret put STATE_SIGNING_SECRET
-npm run deploy
-```
-
-If `npm install` says your Node version is too old, install the current LTS version from <https://nodejs.org/> and try again.
-
-For `GITHUB_WORKFLOW_TOKEN`, paste the GitHub token from step 2.
-
-For `STATE_SIGNING_SECRET`, paste any long random text. You can generate one at:
-<https://1password.com/password-generator/>
-
-After deploy, Wrangler will show a URL like:
+The Cloudflare Worker powers the one-step Strava signup flow.
 
 ```text
-https://running-challenge-join.YOUR_SUBDOMAIN.workers.dev
+Website -> Sign in with Strava -> Cloudflare callback -> choose team -> GitHub Actions -> participant added
 ```
 
-Your join start URL is:
+Current Worker:
 
 ```text
-https://running-challenge-join.YOUR_SUBDOMAIN.workers.dev/start
+https://running-challenge-join.ngimtaizhi.workers.dev
 ```
 
-### 4. Browser-Only Alternative
+Health check:
 
-If you do not want to use terminal yet:
+```text
+https://running-challenge-join.ngimtaizhi.workers.dev/health
+```
 
-1. In Cloudflare, go to **Workers & Pages**.
-2. Create a new Worker called `running-challenge-join`.
-3. If connecting the GitHub repository, use:
-   - Project name: `running-challenge-join`
-   - Build command: leave blank
-   - Deploy command: `npx wrangler deploy`
-   - Root directory: repository root, unless Cloudflare offers a project-root field where you can choose `cloudflare-worker`
-4. If using the Worker code editor instead, replace the default code with `cloudflare-worker/src/index.js`.
-5. Go to **Settings** -> **Variables and Secrets**.
-6. Add these plain text variables:
+## Required Cloudflare Settings
+
+Worker variables:
 
 ```text
 STRAVA_CLIENT_ID=235397
@@ -101,74 +31,66 @@ GITHUB_REF=main
 GITHUB_WORKFLOW_ID=add_participant.yml
 ```
 
-7. Add these as secrets:
+Worker secrets:
 
 ```text
-GITHUB_WORKFLOW_TOKEN=your GitHub token from step 2
-STATE_SIGNING_SECRET=any long random text
+GITHUB_WORKFLOW_TOKEN=GitHub token with Actions read/write access
+STATE_SIGNING_SECRET=long random private value
 ```
 
-8. Save the variables and secrets, then deploy the Worker.
+`STATE_SIGNING_SECRET` is created by you. Use any long random password.
 
-If Cloudflare deploys before the secrets are added, the build can still succeed. The sign-in flow will only work after both secrets exist.
+## Required Strava Setting
 
-### 5. Update Strava Callback Domain
-
-In your Strava API app settings, set the Authorization Callback Domain to your Worker domain only, without `https://` and without `/callback`.
-
-Example:
+In [Strava API Settings](https://www.strava.com/settings/api), set Authorization Callback Domain to:
 
 ```text
-running-challenge-join.YOUR_SUBDOMAIN.workers.dev
+running-challenge-join.ngimtaizhi.workers.dev
 ```
 
-Strava requires the `redirect_uri` to be within the configured callback domain.
+Do not include `https://`, `/start`, or `/callback`.
 
-### 6. Connect The Website Button To The Worker
+## Deploy
 
-In `app.js`, update this line:
+Cloudflare is connected to this GitHub repo. The root `wrangler.jsonc` points Cloudflare to:
 
-```js
-const JOIN_WORKER_START_URL = "";
+```text
+cloudflare-worker/src/index.js
 ```
 
-to:
+Recommended Cloudflare build settings:
 
-```js
-const JOIN_WORKER_START_URL = "https://running-challenge-join.YOUR_SUBDOMAIN.workers.dev/start";
+```text
+Build command: leave blank
+Deploy command: npx wrangler deploy
+Root directory: repository root
 ```
 
-Commit and push the change.
+If deploying locally with Node.js 22 or newer:
 
-### 7. Test With One Participant
+```bash
+cd cloudflare-worker
+npm install
+npx wrangler login
+npx wrangler secret put GITHUB_WORKFLOW_TOKEN
+npx wrangler secret put STATE_SIGNING_SECRET
+npm run deploy
+```
 
-1. Open <https://breadlover97.github.io/running-challenge/join.html>.
-2. Click **Sign in with Strava**.
-3. Approve access in Strava.
-4. Enter display name.
-5. Choose **Team A** or **Team B**, then submit the join form.
-6. Confirm the page says the participant is in the challenge queue.
-7. Check the GitHub workflow:
-   <https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml>
-8. When that workflow succeeds, the public leaderboard should refresh automatically. Telegram updates still run on the normal daily schedule.
+## Test
 
-## Important Notes
-
-- The Strava connected-athlete limit still applies. The Worker makes joining smoother, but it does not increase Strava's quota.
-- The Strava authorization code is short-lived and can only be used once.
-- Keep `GITHUB_WORKFLOW_TOKEN` and `STATE_SIGNING_SECRET` private.
-- The Worker does not need your Strava client secret because GitHub Actions already performs the token exchange.
+1. Open [https://running-challenge-join.ngimtaizhi.workers.dev/health](https://running-challenge-join.ngimtaizhi.workers.dev/health).
+2. Confirm it returns `{"ok":true}`.
+3. Open [https://breadlover97.github.io/running-challenge/](https://breadlover97.github.io/running-challenge/).
+4. Click **Sign in with Strava**.
+5. Approve Strava.
+6. Enter display name and team.
+7. Confirm the `Add Strava Participant` workflow runs in GitHub Actions.
 
 ## Troubleshooting
 
-### Strava says the redirect URI is invalid
-
-Check that the Strava callback domain exactly matches your Worker domain, without `https://` and without `/callback`.
-
-### The Worker says GitHub workflow dispatch failed
-
-Check that `GITHUB_WORKFLOW_TOKEN` has Actions read/write access to `breadlover97/running-challenge`.
-
-### Participant approved Strava but does not appear
-
-Open the `Add Strava Participant` workflow run and check the error. The most common causes are an expired Strava code, missing GitHub repo secrets, or the Strava connected-athlete limit.
+- `redirect_uri invalid`: Strava callback domain is wrong.
+- Worker shows an error after Strava approval: check Cloudflare secrets.
+- GitHub workflow dispatch fails: check `GITHUB_WORKFLOW_TOKEN` permissions.
+- Participant does not appear: open the `Add Strava Participant` workflow logs.
+- Strava connected-athlete limit: request a Strava app quota increase.

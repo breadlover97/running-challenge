@@ -106,6 +106,7 @@ jobs:
             echo "No leaderboard changes to commit."
           else
             git commit -m "Update leaderboard after participant join"
+            git pull --rebase
             git push
           fi
 

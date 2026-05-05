@@ -12,7 +12,7 @@
       <nav class="top-nav" aria-label="Challenge actions">
         <a class="site-mark" href="index.html">Mileage Challenge</a>
         <div class="nav-actions">
-          <a id="joinStravaLink" class="primary-action compact-action strava-join-link" href="https://www.strava.com/oauth/authorize?client_id=235397&amp;redirect_uri=https%3A%2F%2Fbreadlover97.github.io%2Frunning-challenge%2F&amp;response_type=code&amp;approval_prompt=force&amp;scope=read,activity:read_all&amp;state=manual">Sign in with Strava</a>
+          <a id="joinStravaLink" class="primary-action compact-action strava-join-link" href="https://running-challenge-join.ngimtaizhi.workers.dev/start">Sign in with Strava</a>
           <a class="secondary-action compact-action" href="join.html">Setup steps</a>
         </div>
       </nav>
@@ -42,20 +42,6 @@
         <div class="team-card compact">
           <span class="summary-label">Last Updated</span>
           <strong id="lastUpdated">Not synced yet</strong>
-        </div>
-      </section>
-
-      <section id="joinPanel" class="join-panel" hidden>
-        <div>
-          <p class="eyebrow">Join request</p>
-          <h2 id="joinPanelTitle">Strava authorization received</h2>
-          <p id="joinPanelMessage">
-            Copy this one-time code and send it privately to the organiser with your display name and chosen team.
-          </p>
-        </div>
-        <div class="code-card">
-          <code id="stravaCode">Waiting for Strava...</code>
-          <button id="copyCodeButton" type="button">Copy Details</button>
         </div>
       </section>
 
