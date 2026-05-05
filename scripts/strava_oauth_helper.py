@@ -57,7 +57,6 @@ def write_config(path: Path, config: dict[str, Any]) -> None:
 def participant_from_token(
     token_payload: dict[str, Any],
     display_name: str | None,
-    source_label: str,
     include_manual_activities: bool,
 ) -> dict[str, Any]:
     athlete = token_payload.get("athlete") or {}
@@ -73,7 +72,6 @@ def participant_from_token(
         "display_name": display_name or inferred_name or f"Strava Athlete {athlete_id}",
         "strava_athlete_id": str(athlete_id),
         "strava_refresh_token": token_payload["refresh_token"],
-        "source_label": source_label,
         "include_manual_activities": include_manual_activities,
     }
 
@@ -197,7 +195,6 @@ def main() -> int:
     parser.add_argument("--client-id", default=os.environ.get("STRAVA_CLIENT_ID"))
     parser.add_argument("--client-secret", default=os.environ.get("STRAVA_CLIENT_SECRET"))
     parser.add_argument("--display-name", help="Display name to show on the leaderboard")
-    parser.add_argument("--source-label", default="Strava App", help='Example: "Garmin → Strava"')
     parser.add_argument("--include-manual-activities", action="store_true")
     parser.add_argument("--config", help="Optional config JSON to append/update, for example config.json")
     parser.add_argument("--port", type=int, default=8080)
@@ -242,7 +239,6 @@ def main() -> int:
         participant = participant_from_token(
             token_payload,
             args.display_name,
-            args.source_label,
             args.include_manual_activities,
         )
 

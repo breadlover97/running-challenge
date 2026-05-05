@@ -171,7 +171,6 @@ def sanitize_activity(
         "elapsed_time_seconds": int(activity.get("elapsed_time") or 0),
         "type": activity_type,
         "team": participant.get("team", "Team A"),
-        "source_label": participant.get("source_label", "Strava"),
         "is_manual": bool(activity.get("manual", False)),
         "strava_activity_url": f"https://www.strava.com/activities/{activity_id}" if activity_id else "",
         "visibility": activity.get("visibility"),
@@ -310,7 +309,6 @@ def main() -> int:
                     "display_name": participant.get("display_name"),
                     "strava_athlete_id": str(participant.get("strava_athlete_id", "")),
                     "team": participant.get("team", "Team A"),
-                    "source_label": participant.get("source_label", "Strava"),
                     "include_manual_activities": bool(participant.get("include_manual_activities", False)),
                 }
                 for participant in participants

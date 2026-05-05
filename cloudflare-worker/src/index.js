@@ -1,7 +1,6 @@
 const STRAVA_AUTHORIZE_URL = "https://www.strava.com/oauth/authorize";
 const GITHUB_API_VERSION = "2022-11-28";
 const MAX_STATE_AGE_SECONDS = 30 * 60;
-const SOURCE_LABELS = new Set(["Garmin → Strava", "Apple Watch → Strava", "Strava App"]);
 const TEAMS = new Set(["Team A", "Team B"]);
 
 export default {
@@ -124,14 +123,6 @@ async function handleStravaCallback(request, env) {
           Display name
           <input name="display_name" type="text" autocomplete="name" placeholder="Your name" required maxlength="80">
         </label>
-        <label>
-          Activity source
-          <select name="source_label">
-            <option>Garmin → Strava</option>
-            <option>Apple Watch → Strava</option>
-            <option>Strava App</option>
-          </select>
-        </label>
         <fieldset>
           <legend>Join as</legend>
           <label><input type="radio" name="team" value="Team A" required checked> Team A</label>
@@ -164,7 +155,6 @@ async function completeJoin(request, env) {
 
   const participant = {
     display_name: cleanName(form.get("display_name")),
-    source_label: cleanSourceLabel(form.get("source_label")),
     team: cleanTeam(form.get("team")),
     include_manual_activities: false
   };
@@ -175,7 +165,6 @@ async function completeJoin(request, env) {
 
   const workflow = await dispatchAddParticipantWorkflow(env, {
     display_name: participant.display_name,
-    source_label: participant.source_label,
     team: participant.team,
     strava_authorization_code: ticket.strava_authorization_code,
     include_manual_activities: String(Boolean(participant.include_manual_activities))
@@ -299,10 +288,6 @@ function cleanName(value) {
 
 function cleanTeam(value) {
   return TEAMS.has(value) ? value : "Team A";
-}
-
-function cleanSourceLabel(value) {
-  return SOURCE_LABELS.has(value) ? value : "Strava App";
 }
 
 function base64UrlEncode(value) {

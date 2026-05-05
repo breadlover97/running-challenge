@@ -7,15 +7,6 @@ on:
         description: "Name to show on the leaderboard"
         required: true
         type: string
-      source_label:
-        description: "Activity source label"
-        required: true
-        default: "Strava App"
-        type: choice
-        options:
-          - "Garmin → Strava"
-          - "Apple Watch → Strava"
-          - "Strava App"
       team:
         description: "Team assignment"
         required: true
@@ -75,7 +66,6 @@ jobs:
           args=(
             --code "${{ inputs.strava_authorization_code }}"
             --display-name "${{ inputs.display_name }}"
-            --source-label "${{ inputs.source_label }}"
             --team "${{ inputs.team }}"
             --output "$RUNNER_TEMP/participant_config.updated.json"
           )
