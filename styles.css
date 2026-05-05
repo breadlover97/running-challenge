@@ -417,27 +417,9 @@ main {
 
 .runner-icon {
   display: inline-block;
-  width: 25px;
-  height: 25px;
   flex: 0 0 auto;
-  overflow: visible;
-}
-
-.runner-icon-head {
-  fill: #f2b28d;
-}
-
-.runner-icon-hair,
-.runner-icon-limb {
-  fill: #1d1d1f;
-}
-
-.runner-icon-shirt {
-  fill: var(--orange);
-}
-
-.runner-icon-shorts {
-  fill: #151515;
+  font-size: 1.05em;
+  line-height: 1;
 }
 
 .team-total-row > div > span {
