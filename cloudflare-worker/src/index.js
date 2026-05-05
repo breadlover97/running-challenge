@@ -18,15 +18,15 @@ export default {
       }
 
       if (request.method === "GET" && url.pathname === "/start") {
-        return startStravaAuth(request, env);
+        return await startStravaAuth(request, env);
       }
 
       if (request.method === "GET" && url.pathname === "/callback") {
-        return handleStravaCallback(request, env);
+        return await handleStravaCallback(request, env);
       }
 
       if (request.method === "POST" && url.pathname === "/complete") {
-        return completeJoin(request, env);
+        return await completeJoin(request, env);
       }
 
       return page("Page not found", "This join link is not valid.", env, 404);
