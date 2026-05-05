@@ -128,11 +128,20 @@ button,
   font-size: 0.78rem;
   font-weight: 900;
   text-decoration: none;
+  transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .nav-tabs a:hover {
   background: #fff;
   color: var(--ink);
+}
+
+.nav-tabs a.active,
+.nav-tabs a[aria-current="true"] {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(5, 5, 5, 0.16);
+  transform: translateY(-1px);
 }
 
 h1,
@@ -233,6 +242,17 @@ main {
 
 .anchor-section {
   scroll-margin-top: 96px;
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 420ms ease, transform 420ms ease;
+}
+
+.scroll-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .team-summary {
@@ -773,6 +793,25 @@ main {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .nav-tabs a,
+  .scroll-reveal,
+  .return-top,
+  .primary-action,
+  .secondary-action {
+    transition: none;
+  }
+
+  .scroll-reveal {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @media (max-width: 920px) {

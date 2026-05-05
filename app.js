@@ -160,6 +160,73 @@ function setupReturnTop() {
   updateVisibility();
 }
 
+function setupScrollEffects() {
+  const navLinks = Array.from(document.querySelectorAll(".nav-tabs a[href^='#']"));
+  const sections = navLinks
+    .map((link) => document.querySelector(link.getAttribute("href")))
+    .filter(Boolean);
+  const revealSections = Array.from(document.querySelectorAll("main > section"));
+
+  const setActiveLink = (id) => {
+    navLinks.forEach((link) => {
+      const isActive = link.getAttribute("href") === `#${id}`;
+      link.classList.toggle("active", isActive);
+      if (isActive) {
+        link.setAttribute("aria-current", "true");
+        link.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    });
+  };
+
+  navLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      const id = link.getAttribute("href")?.slice(1);
+      if (id) setActiveLink(id);
+    });
+  });
+
+  revealSections.forEach((section) => section.classList.add("scroll-reveal"));
+
+  if (!("IntersectionObserver" in window)) {
+    revealSections.forEach((section) => section.classList.add("is-visible"));
+    if (sections[0]) setActiveLink(sections[0].id);
+    return;
+  }
+
+  const activeObserver = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (visible?.target?.id) setActiveLink(visible.target.id);
+    },
+    {
+      rootMargin: "-28% 0px -58% 0px",
+      threshold: [0.1, 0.35, 0.6],
+    },
+  );
+
+  const revealObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    {
+      rootMargin: "0px 0px -12% 0px",
+      threshold: 0.12,
+    },
+  );
+
+  sections.forEach((section) => activeObserver.observe(section));
+  revealSections.forEach((section) => revealObserver.observe(section));
+  if (sections[0]) setActiveLink(sections[0].id);
+}
+
 function renderSummary(data) {
   const leaderboard = data.leaderboard || [];
   const totalRuns = leaderboard.reduce((sum, runner) => sum + Number(runner.total_runs || 0), 0);
@@ -354,6 +421,7 @@ async function loadLeaderboard() {
 
 setupJoinLinks();
 setupReturnTop();
+setupScrollEffects();
 
 loadLeaderboard()
   .then((data) => {
