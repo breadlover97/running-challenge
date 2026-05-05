@@ -1,14 +1,24 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
+  "$schema": "cloudflare-worker/node_modules/wrangler/config-schema.json",
   "name": "running-challenge-join",
+  "main": "cloudflare-worker/src/index.js",
   "compatibility_date": "2026-05-05",
+  "workers_dev": true,
   "observability": {
     "enabled": true
   },
-  "assets": {
-    "directory": "."
+  "vars": {
+    "STRAVA_CLIENT_ID": "235397",
+    "CHALLENGE_SITE_URL": "https://breadlover97.github.io/running-challenge/",
+    "GITHUB_OWNER": "breadlover97",
+    "GITHUB_REPO": "running-challenge",
+    "GITHUB_REF": "main",
+    "GITHUB_WORKFLOW_ID": "add_participant.yml"
   },
-  "compatibility_flags": [
-    "nodejs_compat"
-  ]
+  "secrets": {
+    "required": [
+      "GITHUB_WORKFLOW_TOKEN",
+      "STATE_SIGNING_SECRET"
+    ]
+  }
 }

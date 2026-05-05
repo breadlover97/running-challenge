@@ -83,8 +83,12 @@ If you do not want to use terminal yet:
 
 1. In Cloudflare, go to **Workers & Pages**.
 2. Create a new Worker called `running-challenge-join`.
-3. Open the Worker code editor.
-4. Replace the default code with `cloudflare-worker/src/index.js`.
+3. If connecting the GitHub repository, use:
+   - Project name: `running-challenge-join`
+   - Build command: leave blank
+   - Deploy command: `npx wrangler deploy`
+   - Root directory: repository root, unless Cloudflare offers a project-root field where you can choose `cloudflare-worker`
+4. If using the Worker code editor instead, replace the default code with `cloudflare-worker/src/index.js`.
 5. Go to **Settings** -> **Variables and Secrets**.
 6. Add these plain text variables:
 
