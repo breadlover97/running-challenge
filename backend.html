@@ -49,6 +49,107 @@
       </section>
 
       <section class="info-section">
+        <h2>Repository Map</h2>
+        <pre class="code-block"><code>running-challenge/
+├── index.html                    # Main static dashboard
+├── join.html                     # Participant setup page
+├── backend.html                  # Technical architecture page
+├── styles.css                    # Shared site styling
+├── app.js                        # Browser rendering logic
+├── data/
+│   └── leaderboard.json          # Public generated data
+├── scripts/
+│   ├── fetch_strava.py           # Strava API fetch and sanitisation
+│   ├── build_leaderboard.py      # Aggregates leaderboard/team stats
+│   ├── send_telegram.py          # Sends daily Telegram update
+│   ├── add_participant_from_code.py
+│   ├── update_participant_team.py
+│   └── remove_participant.py
+├── .github/workflows/
+│   ├── daily_update.yml          # Scheduled Strava sync
+│   ├── add_participant.yml       # One-time Strava signup
+│   ├── update_team.yml
+│   └── remove_participant.yml
+├── cloudflare-worker/
+│   ├── src/index.js              # OAuth callback and workflow dispatch
+│   ├── package.json
+│   └── wrangler.jsonc
+├── config.example.json           # Example private config shape
+├── requirements.txt              # Python dependencies
+├── README.md                     # Full setup reference
+└── PARTICIPANT_SETUP.md</code></pre>
+      </section>
+
+      <section class="info-section">
+        <h2>Workflow Responsibilities</h2>
+        <div class="tech-grid">
+          <article>
+            <h3>Daily sync</h3>
+            <p><code>daily_update.yml</code> runs at 23:00 UTC, which is 7:00 am Singapore time. It fetches Strava runs, rebuilds <code>leaderboard.json</code>, sends Telegram, and commits the public data.</p>
+          </article>
+          <article>
+            <h3>Participant join</h3>
+            <p><code>add_participant.yml</code> exchanges the one-time Strava authorization code for a refresh token, updates the private config secret, then refreshes the public leaderboard.</p>
+          </article>
+          <article>
+            <h3>Team changes</h3>
+            <p><code>update_team.yml</code> changes Team A/B assignment in the private config and rebuilds the leaderboard.</p>
+          </article>
+          <article>
+            <h3>Removal</h3>
+            <p><code>remove_participant.yml</code> removes a participant token from the private config and refreshes the public JSON.</p>
+          </article>
+        </div>
+        <p>
+          These workflows share a <code>participant-config</code> concurrency lock so signups, removals,
+          team changes, and Strava token refreshes do not overwrite each other.
+        </p>
+      </section>
+
+      <section class="info-section">
+        <h2>Secrets And Runtime Config</h2>
+        <div class="tech-grid">
+          <article>
+            <h3>GitHub repository secrets</h3>
+            <p><code>STRAVA_CLIENT_ID</code>, <code>STRAVA_CLIENT_SECRET</code>, <code>TELEGRAM_BOT_TOKEN</code>, <code>TELEGRAM_CHAT_ID</code>, <code>PARTICIPANT_CONFIG_JSON</code>, and <code>GH_SECRETS_TOKEN</code>.</p>
+          </article>
+          <article>
+            <h3>Cloudflare Worker secrets</h3>
+            <p><code>GITHUB_WORKFLOW_TOKEN</code> dispatches GitHub Actions. <code>STATE_SIGNING_SECRET</code> signs OAuth state and join tickets.</p>
+          </article>
+          <article>
+            <h3>Cloudflare Worker variables</h3>
+            <p><code>STRAVA_CLIENT_ID</code>, <code>CHALLENGE_SITE_URL</code>, <code>GITHUB_OWNER</code>, <code>GITHUB_REPO</code>, <code>GITHUB_REF</code>, and <code>GITHUB_WORKFLOW_ID</code>.</p>
+          </article>
+          <article>
+            <h3>Private participant config</h3>
+            <p><code>PARTICIPANT_CONFIG_JSON</code> stores display names, Strava athlete IDs, refresh tokens, teams, optional profile image URLs, and manual-activity policy.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="info-section">
+        <h2>Data Contract</h2>
+        <p>
+          <code>scripts/fetch_strava.py</code> reads the private config, refreshes Strava access tokens,
+          fetches paginated athlete activities, keeps only <code>Run</code> activities in the challenge window,
+          and writes a sanitised generated activity file.
+        </p>
+        <p>
+          <code>scripts/build_leaderboard.py</code> converts that activity file into <code>data/leaderboard.json</code>.
+          The website and Telegram message both read from this same JSON source.
+        </p>
+        <pre class="code-block"><code>{
+  "challenge": { "name": "2026 Run Challenge", "timezone": "Asia/Singapore" },
+  "generated_at": "2026-05-05T13:12:01+08:00",
+  "team_summary": { "Team A": {}, "Team B": {} },
+  "leaderboard": [],
+  "daily_summary": {},
+  "validation_summary": {}
+}</code></pre>
+      </section>
+
+      <section class="info-section">
         <h2>Privacy And Fairness</h2>
         <p>
           The public JSON intentionally keeps only challenge data needed for the leaderboard:
