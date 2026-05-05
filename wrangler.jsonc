@@ -14,11 +14,5 @@
     "GITHUB_REPO": "running-challenge",
     "GITHUB_REF": "main",
     "GITHUB_WORKFLOW_ID": "add_participant.yml"
-  },
-  "secrets": {
-    "required": [
-      "GITHUB_WORKFLOW_TOKEN",
-      "STATE_SIGNING_SECRET"
-    ]
   }
 }
