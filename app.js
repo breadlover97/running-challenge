@@ -166,16 +166,8 @@ function addDays(date, days) {
   return next;
 }
 
-function cumulativeTeamSeries(data, team) {
-  const start = parseLocalDate(data.challenge?.start_date);
-  const end = parseLocalDate(data.challenge?.end_date);
-  if (!start || !end) return [];
-
-  const generated = parseLocalDate(String(data.generated_at || "").slice(0, 10)) || new Date();
-  const chartEnd = generated < start ? start : generated > end ? end : generated;
-  const visibleDays = Math.max(daysBetween(start, chartEnd), 1);
+function dailyDistancesByTeam(data, team) {
   const dailyTotals = {};
-
   (data.leaderboard || [])
     .filter((runner) => teamName(runner.team) === team)
     .forEach((runner) => {
@@ -183,12 +175,26 @@ function cumulativeTeamSeries(data, team) {
         dailyTotals[day] = Number(dailyTotals[day] || 0) + Number(distance || 0);
       });
     });
+  return dailyTotals;
+}
+
+function last30DayCumulativeSeries(data, team) {
+  const start = parseLocalDate(data.challenge?.start_date);
+  const end = parseLocalDate(data.challenge?.end_date);
+  if (!start || !end) return [];
+
+  const generated = parseLocalDate(String(data.generated_at || "").slice(0, 10)) || new Date();
+  const windowEnd = generated < start ? start : generated > end ? end : generated;
+  const naturalStart = addDays(windowEnd, -29);
+  const windowStart = naturalStart < start ? start : naturalStart;
+  const visibleDays = Math.max(daysBetween(windowStart, windowEnd), 1);
+  const dailyTotals = dailyDistancesByTeam(data, team);
 
   const series = [];
   let cumulative = 0;
-  const elapsedDays = daysBetween(start, chartEnd);
+  const elapsedDays = daysBetween(windowStart, windowEnd);
   for (let offset = 0; offset <= elapsedDays; offset += 1) {
-    const day = dateKey(addDays(start, offset));
+    const day = dateKey(addDays(windowStart, offset));
     cumulative += Number(dailyTotals[day] || 0);
     series.push({
       x: offset / visibleDays,
@@ -196,7 +202,7 @@ function cumulativeTeamSeries(data, team) {
       date: day,
     });
   }
-  return series.length ? series : [{ x: 0, y: 0, date: dateKey(start) }];
+  return series.length ? series : [{ x: 0, y: 0, date: dateKey(windowStart) }];
 }
 
 function chartScale(value) {
@@ -207,50 +213,49 @@ function chartScale(value) {
   return Math.ceil(max / 25) * 25;
 }
 
-function renderTeamChart(elementId, data, team) {
-  const container = document.getElementById(elementId);
-  if (!container) return;
-
-  const series = cumulativeTeamSeries(data, team);
-  const width = 360;
-  const height = 138;
-  const left = 42;
-  const right = 14;
-  const top = 14;
-  const bottom = 32;
-  const plotWidth = width - left - right;
-  const plotHeight = height - top - bottom;
-  const baseline = height - bottom;
-  const maxDistance = chartScale(Math.max(...series.map((point) => point.y), 0));
-  const points = series.map((point) => {
+function chartLinePoints(series, maxDistance, left, baseline, plotWidth, plotHeight) {
+  return series.map((point) => {
     const x = left + point.x * plotWidth;
     const y = baseline - (point.y / maxDistance) * plotHeight;
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(" ");
-  const latest = series[series.length - 1] || { y: 0, date: "" };
-  const latestPoint = points.split(" ").pop()?.split(",") || [left, baseline];
-  const color = team === "Team B" ? "#007c89" : "#fc4c02";
-  const gradientId = `${elementId}Gradient`;
-  const areaPoints = `${left},${baseline} ${points} ${latestPoint[0]},${baseline}`;
-  const startLabel = shortDate(data.challenge?.start_date);
+}
+
+function renderTeamComparisonChart(data) {
+  const container = document.getElementById("teamComparisonChart");
+  if (!container) return;
+
+  const teamA = last30DayCumulativeSeries(data, "Team A");
+  const teamB = last30DayCumulativeSeries(data, "Team B");
+  const width = 360;
+  const height = 148;
+  const left = 42;
+  const right = 14;
+  const top = 18;
+  const bottom = 32;
+  const plotWidth = width - left - right;
+  const plotHeight = height - top - bottom;
+  const baseline = height - bottom;
+  const maxDistance = chartScale(Math.max(...teamA.map((point) => point.y), ...teamB.map((point) => point.y), 0));
+  const teamAPoints = chartLinePoints(teamA, maxDistance, left, baseline, plotWidth, plotHeight);
+  const teamBPoints = chartLinePoints(teamB, maxDistance, left, baseline, plotWidth, plotHeight);
+  const latestAPoint = teamAPoints.split(" ").pop()?.split(",") || [left, baseline];
+  const latestBPoint = teamBPoints.split(" ").pop()?.split(",") || [left, baseline];
+  const latest = teamA[teamA.length - 1] || teamB[teamB.length - 1] || { date: "" };
+  const startLabel = shortDate(teamA[0]?.date || teamB[0]?.date);
   const endLabel = shortDate(latest.date);
 
   container.innerHTML = `
-    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeAttr(`${team} cumulative distance over the challenge period`)}">
-      <defs>
-        <linearGradient id="${gradientId}" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stop-color="${color}" stop-opacity="0.2"></stop>
-          <stop offset="100%" stop-color="${color}" stop-opacity="0.02"></stop>
-        </linearGradient>
-      </defs>
+    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Team A and Team B cumulative mileage over the last 30 days">
       <line class="chart-grid" x1="${left}" y1="${top}" x2="${width - right}" y2="${top}"></line>
       <line class="chart-grid" x1="${left}" y1="${top + plotHeight / 2}" x2="${width - right}" y2="${top + plotHeight / 2}"></line>
-      <line class="chart-today" x1="${latestPoint[0]}" y1="${top}" x2="${latestPoint[0]}" y2="${baseline}"></line>
+      <line class="chart-today" x1="${width - right}" y1="${top}" x2="${width - right}" y2="${baseline}"></line>
       <line class="chart-axis" x1="${left}" y1="${baseline}" x2="${width - right}" y2="${baseline}"></line>
       <line class="chart-axis" x1="${left}" y1="${top}" x2="${left}" y2="${baseline}"></line>
-      <polygon class="chart-area" fill="url(#${gradientId})" points="${areaPoints}"></polygon>
-      <polyline class="chart-line" style="stroke: ${color}" points="${points}"></polyline>
-      <circle class="chart-dot" style="fill: ${color}" cx="${latestPoint[0]}" cy="${latestPoint[1]}" r="4"></circle>
+      <polyline class="chart-line team-a-line" points="${teamAPoints}"></polyline>
+      <polyline class="chart-line team-b-line" points="${teamBPoints}"></polyline>
+      <circle class="chart-dot team-a-dot" cx="${latestAPoint[0]}" cy="${latestAPoint[1]}" r="4"></circle>
+      <circle class="chart-dot team-b-dot" cx="${latestBPoint[0]}" cy="${latestBPoint[1]}" r="4"></circle>
       <text class="chart-label chart-y-max" x="0" y="${top + 4}">${maxDistance.toFixed(maxDistance < 10 ? 1 : 0)} km</text>
       <text class="chart-label chart-y-zero" x="18" y="${baseline + 4}">0</text>
       <text class="chart-label chart-x-start" x="${left}" y="${height - 8}">${escapeHtml(startLabel)}</text>
@@ -258,11 +263,6 @@ function renderTeamChart(elementId, data, team) {
       <text class="chart-label chart-today-label" x="${width - right}" y="${top - 4}">Today</text>
     </svg>
   `;
-}
-
-function renderTeamCharts(data) {
-  renderTeamChart("teamAChart", data, "Team A");
-  renderTeamChart("teamBChart", data, "Team B");
 }
 
 function setupJoinLinks() {
@@ -354,7 +354,6 @@ function setupScrollEffects() {
 }
 
 function renderSummary(data) {
-  const leaderboard = data.leaderboard || [];
   const teamSummary = data.team_summary || {};
   const teamA = teamSummary["Team A"] || {};
   const teamB = teamSummary["Team B"] || {};
@@ -367,7 +366,7 @@ function renderSummary(data) {
   document.getElementById("teamAMeta").textContent = `${text(teamA.participant_count, "0")} runners`;
   document.getElementById("teamBDistance").textContent = km(teamB.total_distance_km);
   document.getElementById("teamBMeta").textContent = `${text(teamB.participant_count, "0")} runners`;
-  renderTeamCharts(data);
+  renderTeamComparisonChart(data);
 }
 
 function renderTeamBreakdown(data) {

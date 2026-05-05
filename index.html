@@ -27,21 +27,32 @@
 
     <main>
       <section id="teams" class="team-summary anchor-section" aria-label="Team totals">
-        <div class="team-card team-a">
-          <div class="team-card-copy">
-            <span class="summary-label">Team A</span>
-            <strong id="teamADistance">0.0 km</strong>
+        <div class="team-card team-totals-card">
+          <span class="summary-label">Team mileage</span>
+          <div class="team-total-row team-a">
+            <div>
+              <span>Team A</span>
+              <strong id="teamADistance">0.0 km</strong>
+            </div>
             <span id="teamAMeta">0 runners</span>
           </div>
-          <div id="teamAChart" class="team-chart" aria-label="Team A cumulative distance over time"></div>
-        </div>
-        <div class="team-card team-b">
-          <div class="team-card-copy">
-            <span class="summary-label">Team B</span>
-            <strong id="teamBDistance">0.0 km</strong>
+          <div class="team-total-row team-b">
+            <div>
+              <span>Team B</span>
+              <strong id="teamBDistance">0.0 km</strong>
+            </div>
             <span id="teamBMeta">0 runners</span>
           </div>
-          <div id="teamBChart" class="team-chart" aria-label="Team B cumulative distance over time"></div>
+        </div>
+        <div class="team-card team-chart-card">
+          <div class="chart-card-head">
+            <span class="summary-label">Cumulative mileage · last 30 days</span>
+            <div class="chart-legend" aria-label="Chart legend">
+              <span class="team-a">Team A</span>
+              <span class="team-b">Team B</span>
+            </div>
+          </div>
+          <div id="teamComparisonChart" class="team-chart team-comparison-chart" aria-label="Team cumulative mileage over the last 30 days"></div>
         </div>
       </section>
 

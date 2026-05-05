@@ -257,7 +257,7 @@ main {
 
 .team-summary {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1.4fr);
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -273,18 +273,9 @@ main {
 
 .team-card {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(140px, 0.72fr) minmax(220px, 1fr);
-  gap: 18px;
-  align-items: center;
-  min-height: 188px;
+  min-height: 216px;
   overflow: hidden;
   padding: 22px;
-}
-
-.team-card-copy {
-  position: relative;
-  z-index: 1;
 }
 
 .team-card::after {
@@ -296,6 +287,57 @@ main {
   border-radius: 999px;
   background: var(--orange);
   content: "";
+}
+
+.team-totals-card,
+.team-chart-card {
+  display: grid;
+  align-content: stretch;
+  gap: 16px;
+}
+
+.team-chart-card::after {
+  content: none;
+}
+
+.chart-card-head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chart-card-head .summary-label {
+  margin-bottom: 0;
+}
+
+.chart-legend {
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.chart-legend span {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.chart-legend span::before {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--team-a);
+  content: "";
+}
+
+.chart-legend .team-b::before {
+  background: var(--team-b);
 }
 
 .summary-label {
@@ -318,19 +360,41 @@ main {
   line-height: 1;
 }
 
-.team-card-copy > span:last-child {
-  display: block;
-  margin-top: 12px;
+.team-total-row {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+
+.team-total-row > span:last-child {
   color: var(--muted);
   font-weight: 800;
 }
 
-.team-card.team-a::after {
-  width: 58px;
+.team-total-row > div > span {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
-.team-card.team-b::after {
-  width: 36px;
+.team-total-row > div > span::before {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--team-a);
+  content: "";
+}
+
+.team-total-row.team-b > div > span::before {
   background: var(--team-b);
 }
 
@@ -343,6 +407,7 @@ main {
   position: relative;
   z-index: 1;
   min-width: 0;
+  align-self: stretch;
   padding: 8px 8px 4px;
   border: 1px solid rgba(5, 5, 5, 0.06);
   border-radius: 14px;
@@ -372,10 +437,6 @@ main {
   stroke-width: 1.2;
 }
 
-.chart-area {
-  pointer-events: none;
-}
-
 .chart-line {
   fill: none;
   stroke-linecap: round;
@@ -384,9 +445,25 @@ main {
   filter: drop-shadow(0 6px 12px rgba(5, 5, 5, 0.08));
 }
 
+.team-a-line {
+  stroke: var(--team-a);
+}
+
+.team-b-line {
+  stroke: var(--team-b);
+}
+
 .chart-dot {
   stroke: #fff;
   stroke-width: 3;
+}
+
+.team-a-dot {
+  fill: var(--team-a);
+}
+
+.team-b-dot {
+  fill: var(--team-b);
 }
 
 .chart-label {
@@ -913,10 +990,6 @@ main {
   }
 
   .team-summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .team-card {
     grid-template-columns: 1fr;
   }
 
@@ -1002,6 +1075,14 @@ main {
 
   .team-summary {
     grid-template-columns: 1fr;
+  }
+
+  .chart-card-head {
+    display: grid;
+  }
+
+  .chart-legend {
+    justify-content: start;
   }
 
   .insights-grid {
