@@ -27,30 +27,10 @@
 
     <main>
       <section id="teams" class="team-summary anchor-section" aria-label="Team totals">
-        <div class="team-card team-totals-card">
-          <span class="summary-label">Team mileage</span>
-          <div class="team-total-row team-a">
-            <div>
-              <span>Team A</span>
-              <strong id="teamADistance">0.0 km</strong>
-            </div>
-            <span id="teamAMeta">0</span>
-          </div>
-          <div class="team-total-row team-b">
-            <div>
-              <span>Team B</span>
-              <strong id="teamBDistance">0.0 km</strong>
-            </div>
-            <span id="teamBMeta">0</span>
-          </div>
-        </div>
         <div class="team-card team-chart-card">
           <div class="chart-card-head">
             <span class="summary-label">Cumulative mileage</span>
-            <div class="chart-legend" aria-label="Chart legend">
-              <span class="team-a">Team A</span>
-              <span class="team-b">Team B</span>
-            </div>
+            <div id="teamChartMetrics" class="team-chart-metrics" aria-label="Team mileage totals"></div>
           </div>
           <div id="teamComparisonChart" class="team-chart team-comparison-chart" aria-label="Team cumulative mileage"></div>
         </div>
@@ -116,7 +96,7 @@
           exact start or end locations, heart rate, cadence, power, or coordinates.
         </p>
         <p id="syncScheduleNote" class="sync-note">
-          Syncs automatically every day at 7:00 am SGT. Next scheduled sync: loading...
+          Syncs automatically every day at 11:59 pm SGT. Next scheduled sync: loading...
         </p>
         <p>
           For the full technical flow, see <a href="backend.html">How the backend works</a>.
@@ -126,7 +106,7 @@
 
     <footer class="site-footer">
       <span>2026 Run Challenge dashboard</span>
-      <span><a href="backend.html">How it works</a> · <a href="https://www.strava.com/" target="_blank" rel="noreferrer">Powered by Strava API</a></span>
+      <span><a href="https://www.strava.com/" target="_blank" rel="noreferrer">Powered by Strava API</a></span>
     </footer>
 
     <button id="returnTop" class="return-top" type="button" aria-label="Return to top">↑</button>

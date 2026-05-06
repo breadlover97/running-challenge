@@ -92,12 +92,6 @@ function runnerIcon() {
   return `<span class="runner-icon" aria-hidden="true">🏃‍♂️</span>`;
 }
 
-function runnerCountMarkup(count) {
-  const value = Number(count || 0);
-  const label = `${value} runner${value === 1 ? "" : "s"}`;
-  return `<span class="runner-count" title="${escapeAttr(label)}" aria-label="${escapeAttr(label)}">${runnerIcon()}<span aria-hidden="true">${value}</span></span>`;
-}
-
 function singaporeDateParts(value) {
   const parts = singaporePartsFormatter.formatToParts(value).reduce((result, part) => {
     result[part.type] = part.value;
@@ -116,10 +110,10 @@ function nextScheduledSync(generatedAt) {
   const base = parseDate(generatedAt) || new Date();
   const parts = singaporeDateParts(base);
   const nextDate = new Date(parts.year, parts.month - 1, parts.day);
-  if (parts.hour >= 7) {
+  if (parts.hour > 23 || (parts.hour === 23 && parts.minute >= 59)) {
     nextDate.setDate(nextDate.getDate() + 1);
   }
-  return `${dateKey(nextDate)}T07:00:00+08:00`;
+  return `${dateKey(nextDate)}T23:59:00+08:00`;
 }
 
 function rankChange(value) {
@@ -264,29 +258,70 @@ function chartLinePoints(series, maxDistance, left, baseline, plotWidth, plotHei
   }).join(" ");
 }
 
+function chartPoint(series, maxDistance, left, baseline, plotWidth, plotHeight) {
+  const point = series[series.length - 1] || { x: 0, y: 0 };
+  return {
+    x: left + point.x * plotWidth,
+    y: baseline - (point.y / maxDistance) * plotHeight,
+    value: point.y,
+  };
+}
+
+function renderTeamChartMetrics(data) {
+  const container = document.getElementById("teamChartMetrics");
+  if (!container) return;
+
+  const teamSummary = data.team_summary || {};
+  const teams = ["Team A", "Team B"];
+  container.innerHTML = teams.map((name) => {
+    const team = teamSummary[name] || {};
+    const runners = Number(team.participant_count || 0);
+    return `
+      <div class="team-chart-metric ${teamClass(name)}">
+        <span>${escapeHtml(name)}</span>
+        <strong>${km(team.total_distance_km)}</strong>
+        <small>${runnerIcon()} ${runners}</small>
+      </div>
+    `;
+  }).join("");
+}
+
 function renderTeamComparisonChart(data) {
   const container = document.getElementById("teamComparisonChart");
   if (!container) return;
 
   const teamA = cumulativeSeries(data, "Team A");
   const teamB = cumulativeSeries(data, "Team B");
-  const width = 360;
-  const height = 196;
-  const left = 38;
-  const right = 8;
-  const top = 20;
-  const bottom = 24;
+  const width = 760;
+  const height = 300;
+  const left = 54;
+  const right = 128;
+  const top = 30;
+  const bottom = 36;
   const plotWidth = width - left - right;
   const plotHeight = height - top - bottom;
   const baseline = height - bottom;
   const maxDistance = chartScale(Math.max(...teamA.map((point) => point.y), ...teamB.map((point) => point.y), 0));
   const teamAPoints = chartLinePoints(teamA, maxDistance, left, baseline, plotWidth, plotHeight);
   const teamBPoints = chartLinePoints(teamB, maxDistance, left, baseline, plotWidth, plotHeight);
-  const latestAPoint = teamAPoints.split(" ").pop()?.split(",") || [left, baseline];
-  const latestBPoint = teamBPoints.split(" ").pop()?.split(",") || [left, baseline];
+  const latestAPoint = chartPoint(teamA, maxDistance, left, baseline, plotWidth, plotHeight);
+  const latestBPoint = chartPoint(teamB, maxDistance, left, baseline, plotWidth, plotHeight);
+  const labelGap = Math.abs(latestAPoint.y - latestBPoint.y);
+  const teamALabelY = labelGap < 18
+    ? (latestAPoint.value >= latestBPoint.value ? latestAPoint.y - 8 : latestAPoint.y + 14)
+    : latestAPoint.y;
+  const teamBLabelY = labelGap < 18
+    ? (latestBPoint.value > latestAPoint.value ? latestBPoint.y - 8 : latestBPoint.y + 14)
+    : latestBPoint.y;
   const latest = teamA[teamA.length - 1] || teamB[teamB.length - 1] || { date: "" };
   const startLabel = shortDate(teamA[0]?.date || teamB[0]?.date);
   const endLabel = shortDate(latest.date);
+  const startDate = parseLocalDate(teamA[0]?.date || teamB[0]?.date) || new Date();
+  const endDate = parseLocalDate(latest.date) || startDate;
+  const elapsedChartDays = daysBetween(startDate, endDate);
+  const middleLabel = elapsedChartDays > 2
+    ? shortDate(dateKey(addDays(startDate, Math.round(elapsedChartDays / 2))))
+    : "";
 
   container.innerHTML = `
     <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Team A and Team B cumulative mileage">
@@ -297,13 +332,17 @@ function renderTeamComparisonChart(data) {
       <line class="chart-axis" x1="${left}" y1="${top}" x2="${left}" y2="${baseline}"></line>
       <polyline class="chart-line team-a-line" points="${teamAPoints}"></polyline>
       <polyline class="chart-line team-b-line" points="${teamBPoints}"></polyline>
-      <circle class="chart-dot team-a-dot" cx="${latestAPoint[0]}" cy="${latestAPoint[1]}" r="4.6"></circle>
-      <circle class="chart-dot team-b-dot" cx="${latestBPoint[0]}" cy="${latestBPoint[1]}" r="4.6"></circle>
+      <circle class="chart-dot team-a-dot" cx="${latestAPoint.x}" cy="${latestAPoint.y}" r="5.2"></circle>
+      <circle class="chart-dot team-b-dot" cx="${latestBPoint.x}" cy="${latestBPoint.y}" r="5.2"></circle>
       <text class="chart-label chart-y-max" x="0" y="${top + 4}">${maxDistance.toFixed(maxDistance < 10 ? 1 : 0)} km</text>
-      <text class="chart-label chart-y-zero" x="18" y="${baseline + 4}">0</text>
+      <text class="chart-label chart-y-mid" x="0" y="${top + plotHeight / 2 + 4}">${(maxDistance / 2).toFixed(maxDistance < 10 ? 1 : 0)} km</text>
+      <text class="chart-label chart-y-zero" x="34" y="${baseline + 4}">0</text>
       <text class="chart-label chart-x-start" x="${left}" y="${height - 8}">${escapeHtml(startLabel)}</text>
+      ${middleLabel ? `<text class="chart-label chart-x-mid" x="${left + plotWidth / 2}" y="${height - 8}">${escapeHtml(middleLabel)}</text>` : ""}
       <text class="chart-label chart-x-end" x="${width - right}" y="${height - 8}">${escapeHtml(endLabel)}</text>
       <text class="chart-label chart-today-label" x="${width - right}" y="${top - 4}">Today</text>
+      <text class="chart-label chart-end-label team-a-label" x="${width - right + 14}" y="${Math.min(Math.max(teamALabelY + 4, top + 6), baseline - 4)}">Team A ${km(latestAPoint.value)}</text>
+      <text class="chart-label chart-end-label team-b-label" x="${width - right + 14}" y="${Math.min(Math.max(teamBLabelY + 4, top + 6), baseline - 4)}">Team B ${km(latestBPoint.value)}</text>
     </svg>
   `;
 }
@@ -358,24 +397,36 @@ function setupScrollEffects() {
 
   revealSections.forEach((section) => section.classList.add("scroll-reveal"));
 
+  let ticking = false;
+  const updateActiveFromScroll = () => {
+    ticking = false;
+    const navHeight = document.querySelector(".top-nav")?.offsetHeight || 0;
+    const marker = window.scrollY + navHeight + 36;
+    let active = sections[0];
+
+    sections.forEach((section) => {
+      if (section.offsetTop <= marker) {
+        active = section;
+      }
+    });
+
+    if (active?.id) setActiveLink(active.id);
+  };
+
+  const requestActiveUpdate = () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(updateActiveFromScroll);
+  };
+
+  window.addEventListener("scroll", requestActiveUpdate, { passive: true });
+  window.addEventListener("resize", requestActiveUpdate);
+
   if (!("IntersectionObserver" in window)) {
     revealSections.forEach((section) => section.classList.add("is-visible"));
-    if (sections[0]) setActiveLink(sections[0].id);
+    updateActiveFromScroll();
     return;
   }
-
-  const activeObserver = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (visible?.target?.id) setActiveLink(visible.target.id);
-    },
-    {
-      rootMargin: "-28% 0px -58% 0px",
-      threshold: [0.1, 0.35, 0.6],
-    },
-  );
 
   const revealObserver = new IntersectionObserver(
     (entries, observer) => {
@@ -391,24 +442,16 @@ function setupScrollEffects() {
     },
   );
 
-  sections.forEach((section) => activeObserver.observe(section));
   revealSections.forEach((section) => revealObserver.observe(section));
-  if (sections[0]) setActiveLink(sections[0].id);
+  updateActiveFromScroll();
 }
 
 function renderSummary(data) {
-  const teamSummary = data.team_summary || {};
-  const teamA = teamSummary["Team A"] || {};
-  const teamB = teamSummary["Team B"] || {};
-
   document.title = data.challenge?.name || DEFAULT_CHALLENGE_NAME;
   document.getElementById("challengeDates").textContent =
     `${prettyDate(data.challenge?.start_date)} to ${prettyDate(data.challenge?.end_date)}`;
   document.getElementById("challengeCountdown").textContent = challengeDayText(data.challenge, data.generated_at);
-  document.getElementById("teamADistance").textContent = km(teamA.total_distance_km);
-  document.getElementById("teamAMeta").innerHTML = runnerCountMarkup(teamA.participant_count);
-  document.getElementById("teamBDistance").textContent = km(teamB.total_distance_km);
-  document.getElementById("teamBMeta").innerHTML = runnerCountMarkup(teamB.participant_count);
+  renderTeamChartMetrics(data);
   renderTeamComparisonChart(data);
 }
 
@@ -478,12 +521,30 @@ function renderLeaderboard(data) {
   empty.hidden = leaderboard.length > 0;
 }
 
-function insightCard(label, value, detail, className = "") {
+function insightCard(label, value, detail) {
   return `
-    <article class="insight-card ${className}">
+    <article class="insight-card">
       <span>${escapeHtml(label)}</span>
       <strong>${escapeHtml(value)}</strong>
       <p>${escapeHtml(detail)}</p>
+    </article>
+  `;
+}
+
+function insightCompareCard(label, rows, detail = "") {
+  const rowMarkup = rows.map((row) => `
+    <div class="insight-row ${teamClass(row.team)}">
+      <span>${escapeHtml(row.team)}</span>
+      <strong>${escapeHtml(row.value)}</strong>
+      ${row.note ? `<small>${escapeHtml(row.note)}</small>` : ""}
+    </div>
+  `).join("");
+
+  return `
+    <article class="insight-card insight-card-compare">
+      <span>${escapeHtml(label)}</span>
+      <div class="insight-compare">${rowMarkup}</div>
+      ${detail ? `<p>${escapeHtml(detail)}</p>` : ""}
     </article>
   `;
 }
@@ -510,19 +571,42 @@ function projectedFinishDistance(team, timing) {
   return (Number(team.total_distance_km || 0) / timing.currentDay) * timing.totalDays;
 }
 
+function teamMovingSeconds(data, team) {
+  return (data.leaderboard || [])
+    .filter((runner) => teamName(runner.team) === team)
+    .flatMap((runner) => runner.activities || [])
+    .reduce((sum, activity) => sum + Number(activity.moving_time_seconds || 0), 0);
+}
+
+function runnerMovingSeconds(runner) {
+  return (runner.activities || []).reduce((sum, activity) => sum + Number(activity.moving_time_seconds || 0), 0);
+}
+
+function paceSecondsPerKm(seconds, distanceKm) {
+  const secondsValue = Number(seconds || 0);
+  const distanceValue = Number(distanceKm || 0);
+  if (!secondsValue || !distanceValue) return null;
+  return secondsValue / distanceValue;
+}
+
+function pace(seconds, distanceKm) {
+  const secondsPerKm = paceSecondsPerKm(seconds, distanceKm);
+  if (!secondsPerKm) return "-";
+  const rounded = Math.round(secondsPerKm);
+  const minutes = Math.floor(rounded / 60);
+  const secondsPart = String(rounded % 60).padStart(2, "0");
+  return `${minutes}:${secondsPart} /km`;
+}
+
 function runningDayCount(runner) {
   return Object.values(runner.daily_distance_km || {}).filter((distance) => Number(distance || 0) > 0).length;
 }
 
-function biggestTeamDay(data) {
-  return ["Team A", "Team B"].reduce((best, team) => {
-    const dailyTotals = dailyDistancesByTeam(data, team);
-    Object.entries(dailyTotals).forEach(([day, distance]) => {
-      const value = Number(distance || 0);
-      if (!best || value > best.distance) {
-        best = { team, date: day, distance: value };
-      }
-    });
+function biggestTeamDayForTeam(data, team) {
+  const dailyTotals = dailyDistancesByTeam(data, team);
+  return Object.entries(dailyTotals).reduce((best, [day, distance]) => {
+    const value = Number(distance || 0);
+    if (!best || value > best.distance) return { date: day, distance: value };
     return best;
   }, null);
 }
@@ -547,6 +631,22 @@ function activeRunnersThisWeek(leaderboard, timing, team) {
     })).length;
 }
 
+function fastestRunnerByAveragePace(leaderboard, team) {
+  return leaderboard
+    .filter((runner) => teamName(runner.team) === team)
+    .map((runner) => {
+      const movingSeconds = runnerMovingSeconds(runner);
+      const secondsPerKm = paceSecondsPerKm(movingSeconds, runner.total_distance_km);
+      return {
+        runner,
+        movingSeconds,
+        secondsPerKm,
+      };
+    })
+    .filter((item) => item.secondsPerKm)
+    .sort((a, b) => a.secondsPerKm - b.secondsPerKm)[0];
+}
+
 function renderInsights(data) {
   const grid = document.getElementById("insightsGrid");
   if (!grid) return;
@@ -555,15 +655,14 @@ function renderInsights(data) {
   const teamA = data.team_summary?.["Team A"] || { total_distance_km: 0, total_runs: 0 };
   const teamB = data.team_summary?.["Team B"] || { total_distance_km: 0, total_runs: 0 };
   const timing = challengeTiming(data.challenge, data.generated_at);
-  const teamGap = Math.abs(Number(teamA.total_distance_km || 0) - Number(teamB.total_distance_km || 0));
   const teamADistance = Number(teamA.total_distance_km || 0);
   const teamBDistance = Number(teamB.total_distance_km || 0);
-  const leadingTeam = teamBDistance > teamADistance ? "Team B" : "Team A";
-  const teamGapValue = teamGap === 0 ? "Teams are tied" : `${leadingTeam} +${km(teamGap)}`;
   const projectedA = projectedFinishDistance(teamA, timing);
   const projectedB = projectedFinishDistance(teamB, timing);
   const averageA = Number(teamA.participant_count || 0) ? teamADistance / Number(teamA.participant_count || 0) : 0;
   const averageB = Number(teamB.participant_count || 0) ? teamBDistance / Number(teamB.participant_count || 0) : 0;
+  const teamAMovingSeconds = teamMovingSeconds(data, "Team A");
+  const teamBMovingSeconds = teamMovingSeconds(data, "Team B");
   const topRunner = leaderboard[0];
   const mostConsistent = [...leaderboard].sort((a, b) => {
     const dayGap = runningDayCount(b) - runningDayCount(a);
@@ -572,33 +671,98 @@ function renderInsights(data) {
   })[0];
   const longestRun = leaderboard
     .map((runner) => ({ runner, run: runner.longest_run }))
-    .filter((item) => item.run)
-    .sort((a, b) => Number(b.run.distance_km || 0) - Number(a.run.distance_km || 0))[0];
-  const bestTeamDay = biggestTeamDay(data);
+      .filter((item) => item.run)
+      .sort((a, b) => Number(b.run.distance_km || 0) - Number(a.run.distance_km || 0))[0];
+  const bestTeamDayA = biggestTeamDayForTeam(data, "Team A");
+  const bestTeamDayB = biggestTeamDayForTeam(data, "Team B");
+  const fastestA = fastestRunnerByAveragePace(leaderboard, "Team A");
+  const fastestB = fastestRunnerByAveragePace(leaderboard, "Team B");
   const activeA = activeRunnersThisWeek(leaderboard, timing, "Team A");
   const activeB = activeRunnersThisWeek(leaderboard, timing, "Team B");
   const totalDistance = leaderboard.reduce((sum, runner) => sum + Number(runner.total_distance_km || 0), 0);
   const totalActivities = leaderboard.reduce((sum, runner) => sum + Number(runner.total_runs || 0), 0);
 
   const cards = [
-    insightCard(
-      "Team gap",
-      teamGapValue,
-      `Team A: ${km(teamA.total_distance_km)} · Team B: ${km(teamB.total_distance_km)}`,
-      teamGap === 0 ? "" : teamClass(leadingTeam),
-    ),
-    insightCard(
+    insightCompareCard(
       "Projected finish distance",
-      `A ${km(projectedA)} · B ${km(projectedB)}`,
+      [
+        { team: "Team A", value: km(projectedA), note: `${km(teamADistance)} so far` },
+        { team: "Team B", value: km(projectedB), note: `${km(teamBDistance)} so far` },
+      ],
       timing ? `Based on pace through day ${timing.currentDay} of ${timing.totalDays}.` : "Projection appears after challenge dates load.",
     ),
-    insightCard(
+    insightCompareCard(
       "Average km per runner",
-      `A ${km(averageA)} · B ${km(averageB)}`,
+      [
+        { team: "Team A", value: km(averageA), note: `${Number(teamA.participant_count || 0)} runner${Number(teamA.participant_count || 0) === 1 ? "" : "s"}` },
+        { team: "Team B", value: km(averageB), note: `${Number(teamB.participant_count || 0)} runner${Number(teamB.participant_count || 0) === 1 ? "" : "s"}` },
+      ],
       "Team distance divided by assigned runners.",
     ),
-    insightCard("Run distance logged", km(totalDistance), "Combined counted distance from both teams."),
-    insightCard("Activity count", String(totalActivities), "Counted Strava run activities in the challenge period."),
+    insightCompareCard(
+      "Average pace",
+      [
+        { team: "Team A", value: pace(teamAMovingSeconds, teamADistance), note: `${km(teamADistance)} counted` },
+        { team: "Team B", value: pace(teamBMovingSeconds, teamBDistance), note: `${km(teamBDistance)} counted` },
+      ],
+      "Moving time divided by counted distance.",
+    ),
+    insightCompareCard(
+      "Top runner by average pace",
+      [
+        {
+          team: "Team A",
+          value: fastestA ? pace(fastestA.movingSeconds, fastestA.runner.total_distance_km) : "-",
+          note: fastestA ? fastestA.runner.display_name : "No runs yet",
+        },
+        {
+          team: "Team B",
+          value: fastestB ? pace(fastestB.movingSeconds, fastestB.runner.total_distance_km) : "-",
+          note: fastestB ? fastestB.runner.display_name : "No runs yet",
+        },
+      ],
+      "Fastest average pace among runners with counted distance.",
+    ),
+    insightCompareCard(
+      "Biggest single-day team total",
+      [
+        {
+          team: "Team A",
+          value: bestTeamDayA ? km(bestTeamDayA.distance) : "-",
+          note: bestTeamDayA ? prettyDate(bestTeamDayA.date) : "No runs yet",
+        },
+        {
+          team: "Team B",
+          value: bestTeamDayB ? km(bestTeamDayB.distance) : "-",
+          note: bestTeamDayB ? prettyDate(bestTeamDayB.date) : "No runs yet",
+        },
+      ],
+      "Best one-day total for each team.",
+    ),
+    insightCompareCard(
+      "Active runners this week",
+      [
+        { team: "Team A", value: String(activeA), note: "ran this week" },
+        { team: "Team B", value: String(activeB), note: "ran this week" },
+      ],
+      "Runners with at least one counted run this week.",
+    ),
+    insightCompareCard(
+      "Run distance logged",
+      [
+        { team: "Team A", value: km(teamADistance), note: `${Number(teamA.total_runs || 0)} activities` },
+        { team: "Team B", value: km(teamBDistance), note: `${Number(teamB.total_runs || 0)} activities` },
+      ],
+      `${km(totalDistance)} combined counted distance.`,
+    ),
+    insightCompareCard(
+      "Activity count",
+      [
+        { team: "Team A", value: String(Number(teamA.total_runs || 0)), note: "counted runs" },
+        { team: "Team B", value: String(Number(teamB.total_runs || 0)), note: "counted runs" },
+      ],
+      `${totalActivities} total Strava run activities in the challenge period.`,
+    ),
     topRunner
       ? insightCard("Top runner", topRunner.display_name, `${km(topRunner.total_distance_km)} across ${topRunner.total_runs} runs`)
       : insightCard("Top runner", "No runs yet", "The leaderboard will update after the first Strava sync."),
@@ -608,14 +772,6 @@ function renderInsights(data) {
     longestRun
       ? insightCard("Longest run", longestRun.runner.display_name, `${km(longestRun.run.distance_km)} on ${prettyDate(longestRun.run.date)}`)
       : insightCard("Longest run", "No runs yet", "Longest run will appear after activities sync."),
-    bestTeamDay
-      ? insightCard("Biggest team day", `${bestTeamDay.team}: ${km(bestTeamDay.distance)}`, `${prettyDate(bestTeamDay.date)} had the biggest single-day team total.`)
-      : insightCard("Biggest team day", "No runs yet", "The biggest team day will appear after activities sync."),
-    insightCard(
-      "Active runners this week",
-      `A ${activeA} · B ${activeB}`,
-      "Runners with at least one counted run this week.",
-    ),
   ];
 
   grid.innerHTML = cards.join("");
@@ -684,7 +840,7 @@ loadLeaderboard()
     document.getElementById("syncStatus").textContent =
       `Last Synced with Strava API on ${prettyDateTime(data.generated_at)}`;
     document.getElementById("syncScheduleNote").textContent =
-      `Syncs automatically every day at 7:00 am SGT. Next scheduled sync: ${prettyDateTime(nextScheduledSync(data.generated_at))}.`;
+      `Syncs automatically every day at 11:59 pm SGT. Next scheduled sync: ${prettyDateTime(nextScheduledSync(data.generated_at))}.`;
   })
   .catch((error) => {
     console.error(error);

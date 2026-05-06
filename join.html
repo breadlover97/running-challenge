@@ -45,7 +45,7 @@
           <li>New signups are handled by the Cloudflare Worker, which triggers the <a href="https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml">Add Strava Participant</a> workflow.</li>
           <li>To move someone between teams, run <a href="https://github.com/breadlover97/running-challenge/actions/workflows/update_team.yml">Update Participant Team</a>.</li>
           <li>To remove someone, run <a href="https://github.com/breadlover97/running-challenge/actions/workflows/remove_participant.yml">Remove Strava Participant</a>.</li>
-          <li>The daily sync runs at 7:00 am Singapore time and can also be triggered manually from GitHub Actions.</li>
+          <li>The daily sync runs at 11:59 pm Singapore time and can also be triggered manually from GitHub Actions.</li>
         </ol>
         <p>For the full architecture and API flow, read <a href="backend.html">How the backend works</a>.</p>
       </section>
@@ -60,7 +60,7 @@
     </main>
     <footer class="site-footer">
       <span>2026 Run Challenge setup</span>
-      <span><a href="backend.html">How it works</a> · <a href="index.html">Return to main page</a></span>
+      <span><a href="index.html">Return to main page</a></span>
     </footer>
     <script>
       const formatDate = new Intl.DateTimeFormat("en-SG", {

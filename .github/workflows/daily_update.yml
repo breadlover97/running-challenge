@@ -2,8 +2,8 @@ name: Daily Mileage Challenge Update
 
 on:
   schedule:
-    # 23:00 UTC is 07:00 the next day in Singapore.
-    - cron: "0 23 * * *"
+    # 15:59 UTC is 23:59 on the same day in Singapore.
+    - cron: "59 15 * * *"
   workflow_dispatch:
 
 concurrency:
