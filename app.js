@@ -106,6 +106,11 @@ function singaporeDateParts(value) {
   };
 }
 
+function singaporeToday() {
+  const parts = singaporeDateParts(new Date());
+  return new Date(parts.year, parts.month - 1, parts.day);
+}
+
 function nextScheduledSync() {
   const base = new Date();
   const parts = singaporeDateParts(base);
@@ -117,14 +122,7 @@ function nextScheduledSync() {
 }
 
 function elapsedChallengeDays(challenge) {
-  const start = parseLocalDate(challenge?.start_date);
-  const end = parseLocalDate(challenge?.end_date);
-  if (!start || !end) return null;
-
-  const parts = singaporeDateParts(new Date());
-  const today = new Date(parts.year, parts.month - 1, parts.day);
-  const clampedToday = today < start ? start : today > end ? end : today;
-  return daysBetween(start, clampedToday) + 1;
+  return challengeTiming(challenge)?.currentDay || null;
 }
 
 function rankChange(value) {
@@ -185,13 +183,12 @@ function runnerIdentity(runner, options = {}) {
   `;
 }
 
-function challengeDayText(challenge, generatedAt) {
+function challengeDayText(challenge) {
   const start = parseLocalDate(challenge?.start_date);
   const end = parseLocalDate(challenge?.end_date);
   if (!start || !end) return "";
 
-  const generatedDay = String(generatedAt || "").slice(0, 10);
-  const today = parseLocalDate(generatedDay) || new Date();
+  const today = singaporeToday();
   const oneDay = 24 * 60 * 60 * 1000;
   const totalDays = Math.floor((end - start) / oneDay) + 1;
   const currentDay = Math.min(Math.max(Math.floor((today - start) / oneDay) + 1, 1), totalDays);
@@ -233,8 +230,8 @@ function cumulativeSeries(data, team) {
   const end = parseLocalDate(data.challenge?.end_date);
   if (!start || !end) return [];
 
-  const generated = parseLocalDate(String(data.generated_at || "").slice(0, 10)) || new Date();
-  const windowEnd = generated < start ? start : generated > end ? end : generated;
+  const today = singaporeToday();
+  const windowEnd = today < start ? start : today > end ? end : today;
   const visibleDays = Math.max(daysBetween(start, windowEnd), 1);
   const dailyTotals = dailyDistancesByTeam(data, team);
 
@@ -533,7 +530,7 @@ function renderSummary(data) {
   document.title = data.challenge?.name || DEFAULT_CHALLENGE_NAME;
   document.getElementById("challengeDates").textContent =
     `${prettyDate(data.challenge?.start_date)} to ${prettyDate(data.challenge?.end_date)}`;
-  document.getElementById("challengeCountdown").textContent = challengeDayText(data.challenge, data.generated_at);
+  document.getElementById("challengeCountdown").textContent = challengeDayText(data.challenge);
   renderTeamChartMetrics(data);
   renderTeamComparisonChart(data);
 }
@@ -648,13 +645,12 @@ function insightBoard(title, columns, rows, detail = "") {
   `;
 }
 
-function challengeTiming(challenge, generatedAt) {
+function challengeTiming(challenge) {
   const start = parseLocalDate(challenge?.start_date);
   const end = parseLocalDate(challenge?.end_date);
   if (!start || !end) return null;
 
-  const generatedDay = String(generatedAt || "").slice(0, 10);
-  const today = parseLocalDate(generatedDay) || new Date();
+  const today = singaporeToday();
   const clampedToday = today < start ? start : today > end ? end : today;
   return {
     start,
@@ -766,7 +762,7 @@ function renderInsights(data) {
   const leaderboard = data.leaderboard || [];
   const teamA = data.team_summary?.["Team A"] || { total_distance_km: 0, total_runs: 0 };
   const teamB = data.team_summary?.["Team B"] || { total_distance_km: 0, total_runs: 0 };
-  const timing = challengeTiming(data.challenge, data.generated_at);
+  const timing = challengeTiming(data.challenge);
   const teamADistance = Number(teamA.total_distance_km || 0);
   const teamBDistance = Number(teamB.total_distance_km || 0);
   const projectedA = projectedFinishDistance(teamA, timing);
