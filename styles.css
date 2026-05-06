@@ -1072,9 +1072,9 @@ code {
 .insight-board-value {
   display: grid;
   gap: 3px;
-  justify-items: end;
+  justify-items: start;
   min-width: 0;
-  text-align: right;
+  text-align: left;
 }
 
 .insight-board-value strong {

@@ -641,6 +641,12 @@ function projectedFinishDistance(team, timing) {
   return (Number(team.total_distance_km || 0) / timing.currentDay) * timing.totalDays;
 }
 
+function averageWeeklyMileagePerRunner(team, timing) {
+  const runnerCount = Number(team.participant_count || 0);
+  if (!timing || !runnerCount || timing.currentDay <= 0) return 0;
+  return (Number(team.total_distance_km || 0) / runnerCount / timing.currentDay) * 7;
+}
+
 function teamMovingSeconds(data, team) {
   return (data.leaderboard || [])
     .filter((runner) => teamName(runner.team) === team)
@@ -729,8 +735,8 @@ function renderInsights(data) {
   const teamBDistance = Number(teamB.total_distance_km || 0);
   const projectedA = projectedFinishDistance(teamA, timing);
   const projectedB = projectedFinishDistance(teamB, timing);
-  const averageA = Number(teamA.participant_count || 0) ? teamADistance / Number(teamA.participant_count || 0) : 0;
-  const averageB = Number(teamB.participant_count || 0) ? teamBDistance / Number(teamB.participant_count || 0) : 0;
+  const weeklyAverageA = averageWeeklyMileagePerRunner(teamA, timing);
+  const weeklyAverageB = averageWeeklyMileagePerRunner(teamB, timing);
   const teamAMovingSeconds = teamMovingSeconds(data, "Team A");
   const teamBMovingSeconds = teamMovingSeconds(data, "Team B");
   const topRunner = leaderboard[0];
@@ -761,14 +767,9 @@ function renderInsights(data) {
       ],
       [
         {
-          label: "Projected finish",
-          teamA: { value: km(projectedA), note: `${km(teamADistance)} so far` },
-          teamB: { value: km(projectedB), note: `${km(teamBDistance)} so far` },
-        },
-        {
-          label: "Average per runner",
-          teamA: { value: km(averageA), note: `${Number(teamA.participant_count || 0)} runner${Number(teamA.participant_count || 0) === 1 ? "" : "s"}` },
-          teamB: { value: km(averageB), note: `${Number(teamB.participant_count || 0)} runner${Number(teamB.participant_count || 0) === 1 ? "" : "s"}` },
+          label: "Average weekly mileage",
+          teamA: { value: `${km(weeklyAverageA)} / runner`, note: `Projected finish: ${km(projectedA)}` },
+          teamB: { value: `${km(weeklyAverageB)} / runner`, note: `Projected finish: ${km(projectedB)}` },
         },
         {
           label: "Average pace",
