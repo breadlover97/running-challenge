@@ -61,12 +61,14 @@ running-challenge/
 ├── cloudflare-worker/
 │   ├── src/index.js              # OAuth callback and workflow dispatch
 │   ├── package.json
+│   ├── package-lock.json
 │   └── wrangler.jsonc
 ├── wrangler.jsonc                # Root deploy config for Cloudflare Git integration
 ├── requirements.txt
 ├── config.example.json
 ├── CLOUDFLARE_JOIN_SETUP.md
-└── PARTICIPANT_SETUP.md
+├── PARTICIPANT_SETUP.md
+└── .gitignore
 ```
 
 ## Private Config
