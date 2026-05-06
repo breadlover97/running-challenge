@@ -499,11 +499,6 @@ main {
   text-anchor: end;
 }
 
-.chart-end-label {
-  font-size: 0.64rem;
-  text-anchor: start;
-}
-
 .team-a-label {
   color: var(--team-a);
   fill: var(--team-a);
@@ -514,16 +509,33 @@ main {
   fill: var(--team-b);
 }
 
-.chart-crosshair {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: 2;
-  width: 1px;
-  background: rgba(5, 5, 5, 0.24);
+.chart-hover-layer {
   opacity: 0;
   pointer-events: none;
-  transform: translateX(-0.5px);
+}
+
+.chart-crosshair-svg {
+  stroke: rgba(5, 5, 5, 0.3);
+  stroke-dasharray: 4 4;
+  stroke-width: 1.1;
+}
+
+.chart-hover-dot {
+  stroke: #fff;
+  stroke-width: 3;
+}
+
+.team-a-hover-dot {
+  fill: var(--team-a);
+}
+
+.team-b-hover-dot {
+  fill: var(--team-b);
+}
+
+.chart-hit-area {
+  fill: transparent;
+  pointer-events: all;
 }
 
 .chart-tooltip {
@@ -557,7 +569,7 @@ main {
   font-weight: 900;
 }
 
-.chart-canvas.is-hovering .chart-crosshair,
+.chart-canvas.is-hovering .chart-hover-layer,
 .chart-canvas.is-hovering .chart-tooltip {
   opacity: 1;
 }

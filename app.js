@@ -252,17 +252,24 @@ function chartScale(value) {
 
 function chartLinePoints(series, maxDistance, left, baseline, plotWidth, plotHeight) {
   return series.map((point) => {
-    const x = left + point.x * plotWidth;
-    const y = baseline - (point.y / maxDistance) * plotHeight;
+    const { x, y } = chartSvgPoint(point, maxDistance, left, baseline, plotWidth, plotHeight);
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(" ");
 }
 
+function chartSvgPoint(point, maxDistance, left, baseline, plotWidth, plotHeight) {
+  return {
+    x: left + Number(point?.x || 0) * plotWidth,
+    y: baseline - (Number(point?.y || 0) / maxDistance) * plotHeight,
+  };
+}
+
 function chartPoint(series, maxDistance, left, baseline, plotWidth, plotHeight) {
   const point = series[series.length - 1] || { x: 0, y: 0 };
+  const position = chartSvgPoint(point, maxDistance, left, baseline, plotWidth, plotHeight);
   return {
-    x: left + point.x * plotWidth,
-    y: baseline - (point.y / maxDistance) * plotHeight,
+    x: position.x,
+    y: position.y,
     value: point.y,
   };
 }
@@ -298,7 +305,7 @@ function renderTeamComparisonChart(data) {
   const width = 760;
   const height = 300;
   const left = 54;
-  const right = 128;
+  const right = 28;
   const top = 30;
   const bottom = 36;
   const plotWidth = width - left - right;
@@ -309,13 +316,6 @@ function renderTeamComparisonChart(data) {
   const teamBPoints = chartLinePoints(teamB, maxDistance, left, baseline, plotWidth, plotHeight);
   const latestAPoint = chartPoint(teamA, maxDistance, left, baseline, plotWidth, plotHeight);
   const latestBPoint = chartPoint(teamB, maxDistance, left, baseline, plotWidth, plotHeight);
-  const labelGap = Math.abs(latestAPoint.y - latestBPoint.y);
-  const teamALabelY = labelGap < 18
-    ? (latestAPoint.value >= latestBPoint.value ? latestAPoint.y - 8 : latestAPoint.y + 14)
-    : latestAPoint.y;
-  const teamBLabelY = labelGap < 18
-    ? (latestBPoint.value > latestAPoint.value ? latestBPoint.y - 8 : latestBPoint.y + 14)
-    : latestBPoint.y;
   const latest = teamA[teamA.length - 1] || teamB[teamB.length - 1] || { date: "" };
   const startLabel = shortDate(teamA[0]?.date || teamB[0]?.date);
   const endLabel = shortDate(latest.date);
@@ -345,10 +345,13 @@ function renderTeamComparisonChart(data) {
         ${middleLabel ? `<text class="chart-label chart-x-mid" x="${left + plotWidth / 2}" y="${height - 8}">${escapeHtml(middleLabel)}</text>` : ""}
         <text class="chart-label chart-x-end" x="${width - right}" y="${height - 8}">${escapeHtml(endLabel)}</text>
         <text class="chart-label chart-today-label" x="${width - right}" y="${top - 4}">Today</text>
-        <text class="chart-label chart-end-label team-a-label" x="${width - right + 14}" y="${Math.min(Math.max(teamALabelY + 4, top + 6), baseline - 4)}">Team A ${km(latestAPoint.value)}</text>
-        <text class="chart-label chart-end-label team-b-label" x="${width - right + 14}" y="${Math.min(Math.max(teamBLabelY + 4, top + 6), baseline - 4)}">Team B ${km(latestBPoint.value)}</text>
+        <g class="chart-hover-layer">
+          <line class="chart-crosshair-svg" x1="${left}" y1="${top}" x2="${left}" y2="${baseline}"></line>
+          <circle class="chart-hover-dot team-a-hover-dot" cx="${left}" cy="${baseline}" r="5.4"></circle>
+          <circle class="chart-hover-dot team-b-hover-dot" cx="${left}" cy="${baseline}" r="5.4"></circle>
+        </g>
+        <rect class="chart-hit-area" x="${left}" y="${top}" width="${plotWidth}" height="${plotHeight}"></rect>
       </svg>
-      <div class="chart-crosshair" aria-hidden="true"></div>
       <div class="chart-tooltip" role="status" aria-live="polite"></div>
     </div>
   `;
@@ -358,8 +361,12 @@ function renderTeamComparisonChart(data) {
     left,
     right,
     plotWidth,
+    maxDistance,
+    baseline,
+    plotHeight,
     teamA,
     teamB,
+    top,
     width,
   });
 }
@@ -367,9 +374,13 @@ function renderTeamComparisonChart(data) {
 function setupChartHover(container, chart) {
   const canvas = container.querySelector?.(".chart-canvas");
   const svg = container.querySelector?.("svg");
-  const crosshair = container.querySelector?.(".chart-crosshair");
+  const hoverLayer = container.querySelector?.(".chart-hover-layer");
+  const crosshair = container.querySelector?.(".chart-crosshair-svg");
+  const teamADot = container.querySelector?.(".team-a-hover-dot");
+  const teamBDot = container.querySelector?.(".team-b-hover-dot");
+  const hitArea = container.querySelector?.(".chart-hit-area");
   const tooltip = container.querySelector?.(".chart-tooltip");
-  if (!canvas || !svg || !crosshair || !tooltip) return;
+  if (!canvas || !svg || !hoverLayer || !crosshair || !teamADot || !teamBDot || !hitArea || !tooltip) return;
 
   const points = chart.teamA.length >= chart.teamB.length ? chart.teamA : chart.teamB;
   const hide = () => canvas.classList.remove("is-hovering");
@@ -381,11 +392,18 @@ function setupChartHover(container, chart) {
     const pointA = chart.teamA[index] || chart.teamA[chart.teamA.length - 1] || { y: 0, date: "" };
     const pointB = chart.teamB[index] || chart.teamB[chart.teamB.length - 1] || { y: 0, date: pointA.date };
     const chartX = chart.left + (points[index]?.x || 0) * chart.plotWidth;
+    const teamAPosition = chartSvgPoint(pointA, chart.maxDistance, chart.left, chart.baseline, chart.plotWidth, chart.plotHeight);
+    const teamBPosition = chartSvgPoint(pointB, chart.maxDistance, chart.left, chart.baseline, chart.plotWidth, chart.plotHeight);
     const percentX = (chartX / chart.width) * 100;
     const tooltipOnRight = ratio < 0.62;
 
     canvas.classList.add("is-hovering");
-    crosshair.style.left = `${percentX}%`;
+    crosshair.setAttribute("x1", String(chartX));
+    crosshair.setAttribute("x2", String(chartX));
+    teamADot.setAttribute("cx", String(teamAPosition.x));
+    teamADot.setAttribute("cy", String(teamAPosition.y));
+    teamBDot.setAttribute("cx", String(teamBPosition.x));
+    teamBDot.setAttribute("cy", String(teamBPosition.y));
     tooltip.style.left = `${percentX}%`;
     tooltip.style.top = "14px";
     tooltip.classList.toggle("align-right", !tooltipOnRight);
@@ -396,9 +414,9 @@ function setupChartHover(container, chart) {
     `;
   };
 
-  canvas.addEventListener("pointermove", show);
-  canvas.addEventListener("pointerleave", hide);
-  canvas.addEventListener("pointercancel", hide);
+  hitArea.addEventListener("pointermove", show);
+  hitArea.addEventListener("pointerleave", hide);
+  hitArea.addEventListener("pointercancel", hide);
 }
 
 function setupJoinLinks() {
