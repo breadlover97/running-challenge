@@ -116,6 +116,17 @@ function nextScheduledSync() {
   return `${dateKey(nextDate)}T23:59:00+08:00`;
 }
 
+function elapsedChallengeDays(challenge) {
+  const start = parseLocalDate(challenge?.start_date);
+  const end = parseLocalDate(challenge?.end_date);
+  if (!start || !end) return null;
+
+  const parts = singaporeDateParts(new Date());
+  const today = new Date(parts.year, parts.month - 1, parts.day);
+  const clampedToday = today < start ? start : today > end ? end : today;
+  return daysBetween(start, clampedToday) + 1;
+}
+
 function rankChange(value) {
   if (value === null || value === undefined || value === 0) {
     return `<span class="rank-change">-</span>`;
@@ -782,6 +793,7 @@ function renderInsights(data) {
   const activeB = activeRunnersThisWeek(leaderboard, timing, "Team B");
   const totalDistance = leaderboard.reduce((sum, runner) => sum + Number(runner.total_distance_km || 0), 0);
   const totalActivities = leaderboard.reduce((sum, runner) => sum + Number(runner.total_runs || 0), 0);
+  const elapsedDays = elapsedChallengeDays(data.challenge) || timing?.currentDay || 0;
 
   const cards = [
     insightBoard(
@@ -840,7 +852,11 @@ function renderInsights(data) {
       ? insightCard("Top runner", topRunner.display_name, `${km(topRunner.total_distance_km)} across ${topRunner.total_runs} runs`)
       : insightCard("Top runner", "No runs yet", "The leaderboard will update after the first Strava sync."),
     mostConsistent
-      ? insightCard("Most consistent", mostConsistent.display_name, `${runningDayCount(mostConsistent)} running day${runningDayCount(mostConsistent) === 1 ? "" : "s"} so far`)
+      ? insightCard(
+        "Most consistent",
+        mostConsistent.display_name,
+        `${runningDayCount(mostConsistent)}/${elapsedDays} running days so far`,
+      )
       : insightCard("Most consistent", "No runs yet", "Running days will appear after activities sync."),
     longestRun
       ? insightCard("Longest run", longestRun.runner.display_name, `${km(longestRun.run.distance_km)} on ${prettyDate(longestRun.run.date)}`)
