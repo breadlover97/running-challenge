@@ -106,8 +106,8 @@ function singaporeDateParts(value) {
   };
 }
 
-function nextScheduledSync(generatedAt) {
-  const base = parseDate(generatedAt) || new Date();
+function nextScheduledSync() {
+  const base = new Date();
   const parts = singaporeDateParts(base);
   const nextDate = new Date(parts.year, parts.month - 1, parts.day);
   if (parts.hour > 23 || (parts.hour === 23 && parts.minute >= 59)) {
@@ -932,7 +932,7 @@ loadLeaderboard()
     document.getElementById("syncStatus").textContent =
       `Last Synced with Strava API on ${prettyDateTime(data.generated_at)}`;
     document.getElementById("syncScheduleNote").textContent =
-      `Syncs automatically every day at 11:59 pm SGT. Next scheduled sync: ${prettyDateTime(nextScheduledSync(data.generated_at))}.`;
+      `Syncs automatically every day at 11:59 pm SGT. Next scheduled sync: ${prettyDateTime(nextScheduledSync())}.`;
   })
   .catch((error) => {
     console.error(error);
