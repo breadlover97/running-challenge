@@ -276,11 +276,14 @@ function renderTeamChartMetrics(data) {
   container.innerHTML = teams.map((name) => {
     const team = teamSummary[name] || {};
     const runners = Number(team.participant_count || 0);
+    const runnerLabel = `${runners} runner${runners === 1 ? "" : "s"}`;
     return `
       <div class="team-chart-metric ${teamClass(name)}">
-        <span>${escapeHtml(name)}</span>
+        <div class="team-chart-metric-head">
+          <span>${escapeHtml(name)}</span>
+          <small title="${escapeAttr(runnerLabel)}" aria-label="${escapeAttr(runnerLabel)}">${runnerIcon()} ${runners}</small>
+        </div>
         <strong>${km(team.total_distance_km)}</strong>
-        <small>${runnerIcon()} ${runners}</small>
       </div>
     `;
   }).join("");
@@ -324,27 +327,78 @@ function renderTeamComparisonChart(data) {
     : "";
 
   container.innerHTML = `
-    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Team A and Team B cumulative mileage">
-      <line class="chart-grid" x1="${left}" y1="${top}" x2="${width - right}" y2="${top}"></line>
-      <line class="chart-grid" x1="${left}" y1="${top + plotHeight / 2}" x2="${width - right}" y2="${top + plotHeight / 2}"></line>
-      <line class="chart-today" x1="${width - right}" y1="${top}" x2="${width - right}" y2="${baseline}"></line>
-      <line class="chart-axis" x1="${left}" y1="${baseline}" x2="${width - right}" y2="${baseline}"></line>
-      <line class="chart-axis" x1="${left}" y1="${top}" x2="${left}" y2="${baseline}"></line>
-      <polyline class="chart-line team-a-line" points="${teamAPoints}"></polyline>
-      <polyline class="chart-line team-b-line" points="${teamBPoints}"></polyline>
-      <circle class="chart-dot team-a-dot" cx="${latestAPoint.x}" cy="${latestAPoint.y}" r="5.2"></circle>
-      <circle class="chart-dot team-b-dot" cx="${latestBPoint.x}" cy="${latestBPoint.y}" r="5.2"></circle>
-      <text class="chart-label chart-y-max" x="0" y="${top + 4}">${maxDistance.toFixed(maxDistance < 10 ? 1 : 0)} km</text>
-      <text class="chart-label chart-y-mid" x="0" y="${top + plotHeight / 2 + 4}">${(maxDistance / 2).toFixed(maxDistance < 10 ? 1 : 0)} km</text>
-      <text class="chart-label chart-y-zero" x="34" y="${baseline + 4}">0</text>
-      <text class="chart-label chart-x-start" x="${left}" y="${height - 8}">${escapeHtml(startLabel)}</text>
-      ${middleLabel ? `<text class="chart-label chart-x-mid" x="${left + plotWidth / 2}" y="${height - 8}">${escapeHtml(middleLabel)}</text>` : ""}
-      <text class="chart-label chart-x-end" x="${width - right}" y="${height - 8}">${escapeHtml(endLabel)}</text>
-      <text class="chart-label chart-today-label" x="${width - right}" y="${top - 4}">Today</text>
-      <text class="chart-label chart-end-label team-a-label" x="${width - right + 14}" y="${Math.min(Math.max(teamALabelY + 4, top + 6), baseline - 4)}">Team A ${km(latestAPoint.value)}</text>
-      <text class="chart-label chart-end-label team-b-label" x="${width - right + 14}" y="${Math.min(Math.max(teamBLabelY + 4, top + 6), baseline - 4)}">Team B ${km(latestBPoint.value)}</text>
-    </svg>
+    <div class="chart-canvas">
+      <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Team A and Team B cumulative mileage">
+        <line class="chart-grid" x1="${left}" y1="${top}" x2="${width - right}" y2="${top}"></line>
+        <line class="chart-grid" x1="${left}" y1="${top + plotHeight / 2}" x2="${width - right}" y2="${top + plotHeight / 2}"></line>
+        <line class="chart-today" x1="${width - right}" y1="${top}" x2="${width - right}" y2="${baseline}"></line>
+        <line class="chart-axis" x1="${left}" y1="${baseline}" x2="${width - right}" y2="${baseline}"></line>
+        <line class="chart-axis" x1="${left}" y1="${top}" x2="${left}" y2="${baseline}"></line>
+        <polyline class="chart-line team-a-line" points="${teamAPoints}"></polyline>
+        <polyline class="chart-line team-b-line" points="${teamBPoints}"></polyline>
+        <circle class="chart-dot team-a-dot" cx="${latestAPoint.x}" cy="${latestAPoint.y}" r="5.2"></circle>
+        <circle class="chart-dot team-b-dot" cx="${latestBPoint.x}" cy="${latestBPoint.y}" r="5.2"></circle>
+        <text class="chart-label chart-y-max" x="0" y="${top + 4}">${maxDistance.toFixed(maxDistance < 10 ? 1 : 0)} km</text>
+        <text class="chart-label chart-y-mid" x="0" y="${top + plotHeight / 2 + 4}">${(maxDistance / 2).toFixed(maxDistance < 10 ? 1 : 0)} km</text>
+        <text class="chart-label chart-y-zero" x="34" y="${baseline + 4}">0</text>
+        <text class="chart-label chart-x-start" x="${left}" y="${height - 8}">${escapeHtml(startLabel)}</text>
+        ${middleLabel ? `<text class="chart-label chart-x-mid" x="${left + plotWidth / 2}" y="${height - 8}">${escapeHtml(middleLabel)}</text>` : ""}
+        <text class="chart-label chart-x-end" x="${width - right}" y="${height - 8}">${escapeHtml(endLabel)}</text>
+        <text class="chart-label chart-today-label" x="${width - right}" y="${top - 4}">Today</text>
+        <text class="chart-label chart-end-label team-a-label" x="${width - right + 14}" y="${Math.min(Math.max(teamALabelY + 4, top + 6), baseline - 4)}">Team A ${km(latestAPoint.value)}</text>
+        <text class="chart-label chart-end-label team-b-label" x="${width - right + 14}" y="${Math.min(Math.max(teamBLabelY + 4, top + 6), baseline - 4)}">Team B ${km(latestBPoint.value)}</text>
+      </svg>
+      <div class="chart-crosshair" aria-hidden="true"></div>
+      <div class="chart-tooltip" role="status" aria-live="polite"></div>
+    </div>
   `;
+
+  setupChartHover(container, {
+    height,
+    left,
+    right,
+    plotWidth,
+    teamA,
+    teamB,
+    width,
+  });
+}
+
+function setupChartHover(container, chart) {
+  const canvas = container.querySelector?.(".chart-canvas");
+  const svg = container.querySelector?.("svg");
+  const crosshair = container.querySelector?.(".chart-crosshair");
+  const tooltip = container.querySelector?.(".chart-tooltip");
+  if (!canvas || !svg || !crosshair || !tooltip) return;
+
+  const points = chart.teamA.length >= chart.teamB.length ? chart.teamA : chart.teamB;
+  const hide = () => canvas.classList.remove("is-hovering");
+  const show = (event) => {
+    const rect = svg.getBoundingClientRect();
+    const svgX = ((event.clientX - rect.left) / rect.width) * chart.width;
+    const ratio = Math.min(Math.max((svgX - chart.left) / chart.plotWidth, 0), 1);
+    const index = Math.min(Math.max(Math.round(ratio * Math.max(points.length - 1, 0)), 0), Math.max(points.length - 1, 0));
+    const pointA = chart.teamA[index] || chart.teamA[chart.teamA.length - 1] || { y: 0, date: "" };
+    const pointB = chart.teamB[index] || chart.teamB[chart.teamB.length - 1] || { y: 0, date: pointA.date };
+    const chartX = chart.left + (points[index]?.x || 0) * chart.plotWidth;
+    const percentX = (chartX / chart.width) * 100;
+    const tooltipOnRight = ratio < 0.62;
+
+    canvas.classList.add("is-hovering");
+    crosshair.style.left = `${percentX}%`;
+    tooltip.style.left = `${percentX}%`;
+    tooltip.style.top = "14px";
+    tooltip.classList.toggle("align-right", !tooltipOnRight);
+    tooltip.innerHTML = `
+      <span>${escapeHtml(prettyDate(pointA.date || pointB.date))}</span>
+      <strong class="team-a-label">Team A ${km(pointA.y)}</strong>
+      <strong class="team-b-label">Team B ${km(pointB.y)}</strong>
+    `;
+  };
+
+  canvas.addEventListener("pointermove", show);
+  canvas.addEventListener("pointerleave", hide);
+  canvas.addEventListener("pointercancel", hide);
 }
 
 function setupJoinLinks() {
@@ -531,19 +585,35 @@ function insightCard(label, value, detail) {
   `;
 }
 
-function insightCompareCard(label, rows, detail = "") {
+function insightBoard(title, columns, rows, detail = "") {
+  const headerMarkup = columns.map((column) => `
+    <div class="insight-board-team ${teamClass(column.team)}">
+      <span>${escapeHtml(column.team)}</span>
+      <strong>${escapeHtml(column.summary)}</strong>
+    </div>
+  `).join("");
+
   const rowMarkup = rows.map((row) => `
-    <div class="insight-row ${teamClass(row.team)}">
-      <span>${escapeHtml(row.team)}</span>
-      <strong>${escapeHtml(row.value)}</strong>
-      ${row.note ? `<small>${escapeHtml(row.note)}</small>` : ""}
+    <div class="insight-board-row">
+      <span>${escapeHtml(row.label)}</span>
+      <div class="insight-board-value">
+        <strong>${escapeHtml(row.teamA.value)}</strong>
+        <small>${escapeHtml(row.teamA.note || "")}</small>
+      </div>
+      <div class="insight-board-value">
+        <strong>${escapeHtml(row.teamB.value)}</strong>
+        <small>${escapeHtml(row.teamB.note || "")}</small>
+      </div>
     </div>
   `).join("");
 
   return `
-    <article class="insight-card insight-card-compare">
-      <span>${escapeHtml(label)}</span>
-      <div class="insight-compare">${rowMarkup}</div>
+    <article class="insight-card insight-board-card">
+      <div class="insight-board-head">
+        <span>${escapeHtml(title)}</span>
+        <div>${headerMarkup}</div>
+      </div>
+      <div class="insight-board">${rowMarkup}</div>
       ${detail ? `<p>${escapeHtml(detail)}</p>` : ""}
     </article>
   `;
@@ -683,85 +753,62 @@ function renderInsights(data) {
   const totalActivities = leaderboard.reduce((sum, runner) => sum + Number(runner.total_runs || 0), 0);
 
   const cards = [
-    insightCompareCard(
-      "Projected finish distance",
+    insightBoard(
+      "Team comparison",
       [
-        { team: "Team A", value: km(projectedA), note: `${km(teamADistance)} so far` },
-        { team: "Team B", value: km(projectedB), note: `${km(teamBDistance)} so far` },
+        { team: "Team A", summary: km(teamADistance) },
+        { team: "Team B", summary: km(teamBDistance) },
       ],
-      timing ? `Based on pace through day ${timing.currentDay} of ${timing.totalDays}.` : "Projection appears after challenge dates load.",
-    ),
-    insightCompareCard(
-      "Average km per runner",
-      [
-        { team: "Team A", value: km(averageA), note: `${Number(teamA.participant_count || 0)} runner${Number(teamA.participant_count || 0) === 1 ? "" : "s"}` },
-        { team: "Team B", value: km(averageB), note: `${Number(teamB.participant_count || 0)} runner${Number(teamB.participant_count || 0) === 1 ? "" : "s"}` },
-      ],
-      "Team distance divided by assigned runners.",
-    ),
-    insightCompareCard(
-      "Average pace",
-      [
-        { team: "Team A", value: pace(teamAMovingSeconds, teamADistance), note: `${km(teamADistance)} counted` },
-        { team: "Team B", value: pace(teamBMovingSeconds, teamBDistance), note: `${km(teamBDistance)} counted` },
-      ],
-      "Moving time divided by counted distance.",
-    ),
-    insightCompareCard(
-      "Top runner by average pace",
       [
         {
-          team: "Team A",
-          value: fastestA ? pace(fastestA.movingSeconds, fastestA.runner.total_distance_km) : "-",
-          note: fastestA ? fastestA.runner.display_name : "No runs yet",
+          label: "Projected finish",
+          teamA: { value: km(projectedA), note: `${km(teamADistance)} so far` },
+          teamB: { value: km(projectedB), note: `${km(teamBDistance)} so far` },
         },
         {
-          team: "Team B",
-          value: fastestB ? pace(fastestB.movingSeconds, fastestB.runner.total_distance_km) : "-",
-          note: fastestB ? fastestB.runner.display_name : "No runs yet",
-        },
-      ],
-      "Fastest average pace among runners with counted distance.",
-    ),
-    insightCompareCard(
-      "Biggest single-day team total",
-      [
-        {
-          team: "Team A",
-          value: bestTeamDayA ? km(bestTeamDayA.distance) : "-",
-          note: bestTeamDayA ? prettyDate(bestTeamDayA.date) : "No runs yet",
+          label: "Average per runner",
+          teamA: { value: km(averageA), note: `${Number(teamA.participant_count || 0)} runner${Number(teamA.participant_count || 0) === 1 ? "" : "s"}` },
+          teamB: { value: km(averageB), note: `${Number(teamB.participant_count || 0)} runner${Number(teamB.participant_count || 0) === 1 ? "" : "s"}` },
         },
         {
-          team: "Team B",
-          value: bestTeamDayB ? km(bestTeamDayB.distance) : "-",
-          note: bestTeamDayB ? prettyDate(bestTeamDayB.date) : "No runs yet",
+          label: "Average pace",
+          teamA: { value: pace(teamAMovingSeconds, teamADistance), note: `${km(teamADistance)} counted` },
+          teamB: { value: pace(teamBMovingSeconds, teamBDistance), note: `${km(teamBDistance)} counted` },
+        },
+        {
+          label: "Top pace runner",
+          teamA: {
+            value: fastestA ? pace(fastestA.movingSeconds, fastestA.runner.total_distance_km) : "-",
+            note: fastestA ? fastestA.runner.display_name : "No runs yet",
+          },
+          teamB: {
+            value: fastestB ? pace(fastestB.movingSeconds, fastestB.runner.total_distance_km) : "-",
+            note: fastestB ? fastestB.runner.display_name : "No runs yet",
+          },
+        },
+        {
+          label: "Biggest team day",
+          teamA: {
+            value: bestTeamDayA ? km(bestTeamDayA.distance) : "-",
+            note: bestTeamDayA ? prettyDate(bestTeamDayA.date) : "No runs yet",
+          },
+          teamB: {
+            value: bestTeamDayB ? km(bestTeamDayB.distance) : "-",
+            note: bestTeamDayB ? prettyDate(bestTeamDayB.date) : "No runs yet",
+          },
+        },
+        {
+          label: "Active this week",
+          teamA: { value: String(activeA), note: "ran this week" },
+          teamB: { value: String(activeB), note: "ran this week" },
+        },
+        {
+          label: "Activity count",
+          teamA: { value: String(Number(teamA.total_runs || 0)), note: "counted runs" },
+          teamB: { value: String(Number(teamB.total_runs || 0)), note: "counted runs" },
         },
       ],
-      "Best one-day total for each team.",
-    ),
-    insightCompareCard(
-      "Active runners this week",
-      [
-        { team: "Team A", value: String(activeA), note: "ran this week" },
-        { team: "Team B", value: String(activeB), note: "ran this week" },
-      ],
-      "Runners with at least one counted run this week.",
-    ),
-    insightCompareCard(
-      "Run distance logged",
-      [
-        { team: "Team A", value: km(teamADistance), note: `${Number(teamA.total_runs || 0)} activities` },
-        { team: "Team B", value: km(teamBDistance), note: `${Number(teamB.total_runs || 0)} activities` },
-      ],
-      `${km(totalDistance)} combined counted distance.`,
-    ),
-    insightCompareCard(
-      "Activity count",
-      [
-        { team: "Team A", value: String(Number(teamA.total_runs || 0)), note: "counted runs" },
-        { team: "Team B", value: String(Number(teamB.total_runs || 0)), note: "counted runs" },
-      ],
-      `${totalActivities} total Strava run activities in the challenge period.`,
+      `${km(totalDistance)} combined distance across ${totalActivities} counted Strava run activities.`,
     ),
     topRunner
       ? insightCard("Top runner", topRunner.display_name, `${km(topRunner.total_distance_km)} across ${topRunner.total_runs} runs`)

@@ -284,7 +284,7 @@ main {
 
 .team-card {
   position: relative;
-  min-height: 348px;
+  min-height: 318px;
   overflow: hidden;
   padding: clamp(18px, 3vw, 30px);
 }
@@ -300,26 +300,29 @@ main {
   z-index: 1;
   display: flex;
   gap: 12px;
-  align-items: center;
+  align-items: start;
   justify-content: space-between;
 }
 
-.chart-card-head .summary-label {
+.chart-title {
   margin-bottom: 0;
+  font-size: clamp(1.35rem, 2.3vw, 2rem);
+  font-weight: 900;
+  line-height: 1.05;
 }
 
 .team-chart-metrics {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   justify-content: flex-end;
 }
 
 .team-chart-metric {
   display: grid;
-  min-width: 168px;
-  gap: 2px;
-  padding: 10px 12px;
+  min-width: 252px;
+  gap: 8px;
+  padding: 12px 14px;
   border: 1px solid rgba(252, 76, 2, 0.2);
   border-radius: 14px;
   background: var(--team-a-soft);
@@ -330,12 +333,19 @@ main {
   background: var(--team-b-soft);
 }
 
+.team-chart-metric-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .team-chart-metric span {
   display: inline-flex;
   gap: 6px;
   align-items: center;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 900;
   text-transform: uppercase;
 }
@@ -359,13 +369,14 @@ main {
   line-height: 1;
 }
 
-.team-chart-metric small {
+.team-chart-metric-head small {
   display: inline-flex;
   gap: 4px;
   align-items: center;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 900;
+  white-space: nowrap;
 }
 
 .summary-label {
@@ -410,9 +421,14 @@ main {
   background: transparent;
 }
 
+.chart-canvas {
+  position: relative;
+  cursor: crosshair;
+}
+
 .team-chart svg {
   width: 100%;
-  height: clamp(270px, 30vw, 430px);
+  height: clamp(230px, 24vw, 350px);
   overflow: visible;
 }
 
@@ -489,11 +505,61 @@ main {
 }
 
 .team-a-label {
+  color: var(--team-a);
   fill: var(--team-a);
 }
 
 .team-b-label {
+  color: var(--team-b);
   fill: var(--team-b);
+}
+
+.chart-crosshair {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 1px;
+  background: rgba(5, 5, 5, 0.24);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-0.5px);
+}
+
+.chart-tooltip {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  min-width: 160px;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 14px 34px rgba(5, 5, 5, 0.14);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(12px, 0);
+}
+
+.chart-tooltip.align-right {
+  transform: translate(calc(-100% - 12px), 0);
+}
+
+.chart-tooltip span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.chart-tooltip strong {
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.chart-canvas.is-hovering .chart-crosshair,
+.chart-canvas.is-hovering .chart-tooltip {
+  opacity: 1;
 }
 
 .panel,
@@ -918,42 +984,48 @@ code {
   font-weight: 700;
 }
 
-.insight-card-compare {
-  display: grid;
-  align-content: start;
+.insight-board-card {
+  grid-column: 1 / -1;
 }
 
-.insight-compare {
+.insight-board-head {
   display: grid;
-  gap: 8px;
+  grid-template-columns: minmax(160px, 1fr) repeat(2, minmax(150px, 0.8fr));
+  gap: 10px;
+  align-items: stretch;
+  margin-bottom: 12px;
 }
 
-.insight-row {
+.insight-board-head > span {
+  align-self: center;
+  margin: 0;
+}
+
+.insight-board-head > div {
+  display: contents;
+}
+
+.insight-board-team {
   display: grid;
-  grid-template-columns: minmax(70px, 0.7fr) minmax(0, 1fr);
-  gap: 6px 10px;
-  align-items: baseline;
+  gap: 2px;
   padding: 10px;
   border-radius: 12px;
   background: var(--team-a-soft);
 }
 
-.insight-row.team-b {
+.insight-board-team.team-b {
   background: var(--team-b-soft);
 }
 
-.insight-row span {
+.insight-board-team span {
   display: inline-flex;
   gap: 6px;
   align-items: center;
   margin: 0;
-  color: var(--muted);
   font-size: 0.7rem;
-  font-weight: 900;
-  text-transform: uppercase;
 }
 
-.insight-row span::before {
+.insight-board-team span::before {
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -961,23 +1033,58 @@ code {
   content: "";
 }
 
-.insight-row.team-b span::before {
+.insight-board-team.team-b span::before {
   background: var(--team-b);
 }
 
-.insight-row strong {
+.insight-board-team strong {
+  font-size: 1.08rem;
+}
+
+.insight-board {
+  display: grid;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.insight-board-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) repeat(2, minmax(150px, 0.8fr));
+  gap: 10px;
+  align-items: baseline;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.insight-board-row:last-child {
+  border-bottom: 0;
+}
+
+.insight-board-row > span {
   margin: 0;
+  text-transform: none;
+}
+
+.insight-board-row > strong {
   font-size: 1rem;
-  line-height: 1.1;
+}
+
+.insight-board-value {
+  display: grid;
+  gap: 3px;
+  justify-items: end;
+  min-width: 0;
   text-align: right;
 }
 
-.insight-row small {
-  grid-column: 2;
+.insight-board-value strong {
+  font-size: 1rem;
+}
+
+.insight-board-value small {
   color: var(--muted);
   font-size: 0.74rem;
   font-weight: 800;
-  text-align: right;
 }
 
 .activity-list {
@@ -1252,12 +1359,25 @@ code {
     justify-content: start;
   }
 
+  .team-chart-metric {
+    min-width: min(252px, 100%);
+  }
+
   .insights-grid {
     grid-template-columns: 1fr;
   }
 
+  .insight-board-head,
+  .insight-board-row {
+    grid-template-columns: minmax(110px, 0.9fr) repeat(2, minmax(96px, 1fr));
+  }
+
+  .insight-board-row {
+    gap: 8px;
+  }
+
   .team-card {
-    min-height: 310px;
+    min-height: 286px;
   }
 
   .panel,
