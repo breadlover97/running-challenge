@@ -1,51 +1,68 @@
 # 2026 Run Challenge
 
-Static team running dashboard with Strava as the source of truth, GitHub Pages for the website, GitHub Actions for scheduled syncs, Cloudflare Workers for one-step participant signup, and Telegram for daily updates.
+A static team running dashboard for a Strava-first mileage challenge.
 
-Challenge period: **4 May 2026 to 31 December 2026**  
-Timezone: **Asia/Singapore**
+- Challenge period: **4 May 2026 to 31 December 2026**
+- Timezone: **Asia/Singapore**
+- Website: [breadlover97.github.io/running-challenge](https://breadlover97.github.io/running-challenge/)
+- Join Worker: [running-challenge-join.ngimtaizhi.workers.dev](https://running-challenge-join.ngimtaizhi.workers.dev)
 
 ```text
-Garmin / Apple Watch / Strava App -> Strava -> Strava API -> data/leaderboard.json -> GitHub Pages + Telegram
+Garmin / Apple Watch / Strava App
+  -> Strava
+  -> Strava API
+  -> GitHub Actions
+  -> data/leaderboard.json
+  -> GitHub Pages + Telegram
 ```
 
 ## What Counts
 
 - Only Strava activities with type `Run` count.
-- The activity date must be from `2026-05-04` through `2026-12-31`, using `Asia/Singapore`.
-- The filter is based on the activity's Strava start date, not the upload date.
-- A run inside the challenge period can be uploaded later and still count on the next sync.
-- A run before the challenge period will not count even if it is uploaded during the challenge.
-- Manual activities are excluded unless `include_manual_activities` is enabled for that participant.
-- GPS maps, coordinates, heart rate, cadence, power, and exact start/end locations are not stored or displayed.
+- Activity dates must be from `2026-05-04` through `2026-12-31`.
+- The activity date matters, not the upload date.
+- Runs inside the challenge period can be uploaded later and still count.
+- Runs before the challenge period do not count even if uploaded during the challenge.
+- Manual activities are excluded unless enabled for a participant.
+- GPS maps, coordinates, exact start/end locations, heart rate, cadence, power, and detailed sensor data are not stored or displayed.
 
-## Project Structure
+## Current Features
+
+- GitHub Pages static dashboard.
+- Team A vs Team B cumulative mileage chart with hover details.
+- Leaderboard, team contribution breakdown, insights, and activity validation table.
+- One-step Strava signup through Cloudflare Workers.
+- GitHub Actions workflows for daily sync, participant join, team updates, and removals.
+- Telegram daily update generated from the same `data/leaderboard.json` used by the website.
+
+## Repository Map
 
 ```text
 running-challenge/
-├── index.html
-├── join.html
-├── styles.css
-├── app.js
+├── index.html                    # Main dashboard
+├── join.html                     # Participant setup page
+├── backend.html                  # Technical "how it works" page
+├── styles.css                    # Shared site styling
+├── app.js                        # Browser rendering logic
 ├── data/
-│   └── leaderboard.json
+│   └── leaderboard.json          # Public generated dashboard data
 ├── scripts/
-│   ├── fetch_strava.py
-│   ├── build_leaderboard.py
-│   ├── send_telegram.py
+│   ├── fetch_strava.py           # Strava API fetch and sanitisation
+│   ├── build_leaderboard.py      # Leaderboard and team aggregation
+│   ├── send_telegram.py          # Telegram daily update
 │   ├── add_participant_from_code.py
 │   ├── update_participant_team.py
 │   └── remove_participant.py
 ├── .github/workflows/
-│   ├── daily_update.yml
-│   ├── add_participant.yml
+│   ├── daily_update.yml          # 11:59 pm SGT Strava sync
+│   ├── add_participant.yml       # One-time Strava signup
 │   ├── update_team.yml
 │   └── remove_participant.yml
 ├── cloudflare-worker/
-│   ├── src/index.js
+│   ├── src/index.js              # OAuth callback and workflow dispatch
 │   ├── package.json
 │   └── wrangler.jsonc
-├── wrangler.jsonc
+├── wrangler.jsonc                # Root deploy config for Cloudflare Git integration
 ├── requirements.txt
 ├── config.example.json
 ├── CLOUDFLARE_JOIN_SETUP.md
@@ -54,10 +71,10 @@ running-challenge/
 
 ## Private Config
 
-`PARTICIPANT_CONFIG_JSON` is stored as a GitHub repository secret. Do not commit real refresh tokens.
-`profile_image_url` is optional; the one-step join flow fills it from Strava when available, and the website falls back to initials when it is blank.
+The real participant config lives only in the GitHub repository secret `PARTICIPANT_CONFIG_JSON`.
+Do not commit real Strava refresh tokens.
 
-Shape:
+Example shape:
 
 ```json
 {
@@ -80,7 +97,9 @@ Shape:
 }
 ```
 
-## Required Secrets
+`profile_image_url` is optional. The Cloudflare join flow fills it from Strava when available; the site falls back to initials.
+
+## Secrets And Variables
 
 GitHub repository secrets:
 
@@ -105,66 +124,54 @@ Cloudflare Worker variables:
 - `GITHUB_REF=main`
 - `GITHUB_WORKFLOW_ID=add_participant.yml`
 
-## Main Workflows
+Use least-privilege tokens where possible. Rotate secrets if they are pasted outside GitHub or Cloudflare secret storage.
 
-- [Daily 2026 Run Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml): fetches Strava runs, rebuilds `data/leaderboard.json`, sends Telegram, and commits the public JSON.
-- [Add Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml): exchanges the Strava authorization code, updates the private participant config, and refreshes the leaderboard.
+## Workflows
+
+- [Daily 2026 Run Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml): runs at **11:59 pm SGT**, fetches Strava runs, rebuilds `data/leaderboard.json`, sends Telegram, and commits public data.
+- [Add Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml): exchanges a one-time Strava code, updates private participant config, and refreshes the leaderboard.
 - [Update Participant Team](https://github.com/breadlover97/running-challenge/actions/workflows/update_team.yml): changes Team A/B assignment and refreshes the leaderboard.
-- [Remove Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/remove_participant.yml): removes a participant token from the private config and refreshes the leaderboard.
+- [Remove Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/remove_participant.yml): removes a participant token and refreshes the public JSON.
 
-These workflows share a `participant-config` concurrency lock so participant joins, removals, team changes, and daily token refreshes do not overwrite each other. They also stop before publishing a new leaderboard if any participant's Strava data cannot be fetched.
+All workflows share the `participant-config` concurrency lock so signups, removals, team changes, and token refreshes do not overwrite each other.
 
 ## Participant Signup
 
-Participants use:
+Participants use the website and do not need terminal access, GitHub, Cloudflare, or code copying.
 
-[https://breadlover97.github.io/running-challenge/](https://breadlover97.github.io/running-challenge/)
+1. Open [the dashboard](https://breadlover97.github.io/running-challenge/).
+2. Click **Sign in with Strava**.
+3. Approve the Strava permission screen once.
+4. Enter display name.
+5. Choose Team A or Team B.
+6. Submit.
 
-Flow:
+The Cloudflare Worker receives the one-time Strava code and dispatches the `Add Strava Participant` workflow.
 
-1. Click **Sign in with Strava**.
-2. Approve the Strava permission screen once.
-3. Enter display name.
-4. Choose Team A or Team B.
-5. Submit.
-
-The Cloudflare Worker receives the one-time Strava code and triggers the GitHub workflow. Participants do not need terminal access or code copying.
-
-## Strava Setup
+## Strava App Setup
 
 1. Create a Strava API app from [Strava API Settings](https://www.strava.com/settings/api).
-2. Set the Authorization Callback Domain to:
+2. Set **Authorization Callback Domain** to:
 
 ```text
 running-challenge-join.ngimtaizhi.workers.dev
 ```
 
-3. Keep the Strava client secret only in GitHub repository secrets.
+Do not include `https://`, `/start`, or `/callback`.
 
-Official docs:
+Official references:
 
 - [Strava Authentication](https://developers.strava.com/docs/authentication/)
 - [Strava Activities API](https://developers.strava.com/docs/reference/#api-Activities-getLoggedInAthleteActivities)
 
 ## Cloudflare Worker
 
-The deployed Worker is:
+The Worker handles Strava OAuth state, callback processing, team choice, and GitHub workflow dispatch.
 
-```text
-https://running-challenge-join.ngimtaizhi.workers.dev
-```
-
-Health check:
-
-```text
-https://running-challenge-join.ngimtaizhi.workers.dev/health
-```
-
-Setup and redeploy instructions are in [CLOUDFLARE_JOIN_SETUP.md](CLOUDFLARE_JOIN_SETUP.md).
+- Setup guide: [CLOUDFLARE_JOIN_SETUP.md](CLOUDFLARE_JOIN_SETUP.md)
+- Health check: [running-challenge-join.ngimtaizhi.workers.dev/health](https://running-challenge-join.ngimtaizhi.workers.dev/health)
 
 ## Local Checks
-
-Install Python dependencies:
 
 ```bash
 python3 -m venv .venv
@@ -172,12 +179,13 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Validate config and generated data:
-
 ```bash
 python3 scripts/fetch_strava.py --config config.json --dry-run
 python3 scripts/build_leaderboard.py
 python3 scripts/send_telegram.py --dry-run
+python3 -m py_compile scripts/*.py
+node --check app.js
+node --check cloudflare-worker/src/index.js
 ```
 
 Preview the static site:
@@ -191,7 +199,7 @@ Open `http://localhost:8000`.
 ## Privacy Notes
 
 - Participants should consent before joining.
-- The public site shows names, teams, profile photos or initials, mileage totals, daily mileage, run counts, and Strava validation links.
+- The public site shows names, teams, profile photos or initials, mileage totals, run counts, average pace, and Strava validation links.
 - Telegram may mention daily mileage and leaderboard rank.
-- The scripts intentionally avoid GPS maps, exact start/end locations, coordinates, heart rate, cadence, power, and detailed sensor data.
 - A participant can leave by asking the organiser to run the remove-participant workflow.
+- Removed public data may still exist in public git history unless repository history is rewritten, so keep the public JSON limited to challenge-safe fields.

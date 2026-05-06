@@ -66,14 +66,18 @@ jobs:
           STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
           STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
           PARTICIPANT_CONFIG_JSON: ${{ secrets.PARTICIPANT_CONFIG_JSON }}
+          STRAVA_AUTHORIZATION_CODE: ${{ inputs.strava_authorization_code }}
+          DISPLAY_NAME: ${{ inputs.display_name }}
+          TEAM: ${{ inputs.team }}
+          INCLUDE_MANUAL_ACTIVITIES: ${{ inputs.include_manual_activities }}
         run: |
           args=(
-            --code "${{ inputs.strava_authorization_code }}"
-            --display-name "${{ inputs.display_name }}"
-            --team "${{ inputs.team }}"
+            --code "$STRAVA_AUTHORIZATION_CODE"
+            --display-name "$DISPLAY_NAME"
+            --team "$TEAM"
             --output "$RUNNER_TEMP/participant_config.updated.json"
           )
-          if [ "${{ inputs.include_manual_activities }}" = "true" ]; then
+          if [ "$INCLUDE_MANUAL_ACTIVITIES" = "true" ]; then
             args+=(--include-manual-activities)
           fi
           python scripts/add_participant_from_code.py "${args[@]}"

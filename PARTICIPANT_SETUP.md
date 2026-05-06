@@ -1,4 +1,4 @@
-# Participant Setup Guide
+# Participant Setup
 
 This challenge uses Strava as the source of truth. Runs recorded on Garmin, Apple Watch, or the Strava app count only after they appear in Strava as running activities.
 
@@ -39,11 +39,11 @@ You do not need to use terminal, copy a code, or create any GitHub/Cloudflare ac
 - A run before the challenge period does not count even if uploaded during the challenge.
 - Manual activities are excluded by default.
 
-## Consent And Privacy
+## What Appears Publicly
 
 By joining, you agree that:
 
-- Your display name, team, profile photo or initials, total distance, run count, and recent activity links may appear on the website.
+- Your display name, team, profile photo or initials, total distance, run count, pace summary, and recent activity links may appear on the website.
 - Your daily mileage may be posted in the Telegram group.
 - GPS maps, exact start/end locations, coordinates, heart rate, cadence, and power will not be displayed.
 - You can leave by asking the organiser to remove you from the challenge.
@@ -78,3 +78,9 @@ My mileage is wrong:
 - Compare against the distance shown in Strava.
 - The challenge uses Strava distance, not Garmin Connect or Apple Fitness distance.
 - Ask the organiser to check whether the run was excluded as manual, non-run, private, or outside the challenge dates.
+
+I joined but do not see myself yet:
+
+- The join request triggers a GitHub workflow.
+- Wait for the workflow and next Strava sync to complete.
+- Ask the organiser to check GitHub Actions if it still does not show.

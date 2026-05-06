@@ -283,7 +283,12 @@ function callbackUrl(request) {
 }
 
 function cleanName(value) {
-  return String(value || "").trim().replace(/\s+/g, " ").slice(0, 80);
+  return String(value || "")
+    .normalize("NFKC")
+    .replace(/[^\p{L}\p{N} .,'_-]/gu, "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .slice(0, 80);
 }
 
 function cleanTeam(value) {

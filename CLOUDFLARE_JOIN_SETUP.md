@@ -34,11 +34,11 @@ GITHUB_WORKFLOW_ID=add_participant.yml
 Worker secrets:
 
 ```text
-GITHUB_WORKFLOW_TOKEN=GitHub token with Actions read/write access
+GITHUB_WORKFLOW_TOKEN=GitHub token allowed to dispatch the add-participant workflow
 STATE_SIGNING_SECRET=long random private value
 ```
 
-`STATE_SIGNING_SECRET` is created by you. Use any long random password.
+`STATE_SIGNING_SECRET` is created by you. Use a long random value and keep it only in Cloudflare secrets.
 
 ## Required Strava Setting
 
@@ -94,3 +94,4 @@ npm run deploy
 - GitHub workflow dispatch fails: check `GITHUB_WORKFLOW_TOKEN` permissions.
 - Participant does not appear: open the `Add Strava Participant` workflow logs.
 - Strava connected-athlete limit: request a Strava app quota increase.
+- Unexpected names or symbols are removed from display names before dispatch to GitHub Actions.

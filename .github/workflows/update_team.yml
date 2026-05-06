@@ -54,10 +54,12 @@ jobs:
       - name: Update participant team
         env:
           PARTICIPANT_CONFIG_JSON: ${{ secrets.PARTICIPANT_CONFIG_JSON }}
+          PARTICIPANT: ${{ inputs.participant }}
+          TEAM: ${{ inputs.team }}
         run: |
           python scripts/update_participant_team.py \
-            --participant "${{ inputs.participant }}" \
-            --team "${{ inputs.team }}" \
+            --participant "$PARTICIPANT" \
+            --team "$TEAM" \
             --output "$RUNNER_TEMP/participant_config.updated.json"
 
       - name: Save updated participant config secret

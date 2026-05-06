@@ -51,10 +51,12 @@ jobs:
       - name: Remove participant from config
         env:
           PARTICIPANT_CONFIG_JSON: ${{ secrets.PARTICIPANT_CONFIG_JSON }}
+          PARTICIPANT: ${{ inputs.participant }}
+          CONFIRM_REMOVE: ${{ inputs.confirm_remove }}
         run: |
           python scripts/remove_participant.py \
-            --participant "${{ inputs.participant }}" \
-            --confirm "${{ inputs.confirm_remove }}" \
+            --participant "$PARTICIPANT" \
+            --confirm "$CONFIRM_REMOVE" \
             --output "$RUNNER_TEMP/participant_config.updated.json"
 
       - name: Save updated participant config secret
