@@ -1154,15 +1154,39 @@ code {
   display: grid;
   gap: 0;
   padding: 0 18px 16px;
+  overflow-x: auto;
 }
 
 .activity-row {
   display: grid;
-  grid-template-columns: 110px minmax(0, 1fr) 90px 80px 70px;
+  grid-template-columns: 108px minmax(150px, 1.45fr) 88px 86px 86px 78px 82px 70px 64px;
   gap: 12px;
   align-items: center;
+  min-width: 940px;
   padding: 12px 0;
   border-top: 1px solid var(--line);
+}
+
+.activity-row-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding-top: 10px;
+  background: #fff;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.activity-row-header + .activity-row {
+  border-top-style: solid;
+}
+
+.activity-row span,
+.activity-row strong {
+  min-width: 0;
 }
 
 .activity-title {
@@ -1449,6 +1473,30 @@ code {
   .activity-row {
     grid-template-columns: 1fr;
     gap: 5px;
+    min-width: 0;
+  }
+
+  .activity-row-header {
+    display: none;
+  }
+
+  .activity-row > span,
+  .activity-row > strong {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    text-align: right;
+  }
+
+  .activity-row > span::before,
+  .activity-row > strong::before {
+    flex: 0 0 auto;
+    color: var(--muted);
+    content: attr(data-label);
+    font-size: 0.68rem;
+    font-weight: 900;
+    text-align: left;
+    text-transform: uppercase;
   }
 
   .team-runner-row {

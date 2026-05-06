@@ -692,6 +692,13 @@ function pace(seconds, distanceKm) {
   return `${minutes}:${secondsPart} /km`;
 }
 
+function visibilityLabel(activity) {
+  if (activity.is_private === true || activity.visibility === "only_me") return "Private";
+  if (activity.visibility === "followers_only") return "Followers";
+  if (activity.visibility === "everyone") return "Public";
+  return text(activity.visibility, "-");
+}
+
 function runningDayCount(runner) {
   return Object.values(runner.daily_distance_km || {}).filter((distance) => Number(distance || 0) > 0).length;
 }
@@ -862,11 +869,15 @@ function renderActivities(data) {
           : `<span>-</span>`;
         return `
           <div class="activity-row">
-          <span>${prettyDate(activity.date)}</span>
-          <span class="activity-title" title="${escapeAttr(activity.activity_name)}">${escapeHtml(activity.activity_name)}</span>
-            <strong>${km(activity.distance_km)}</strong>
-            <span>${duration(activity.moving_time_seconds)}</span>
-            <span>${link}</span>
+            <span data-label="Date">${prettyDate(activity.date)}</span>
+            <span data-label="Activity" class="activity-title" title="${escapeAttr(activity.activity_name)}">${escapeHtml(activity.activity_name)}</span>
+            <strong data-label="Distance">${km(activity.distance_km)}</strong>
+            <span data-label="Moving time">${duration(activity.moving_time_seconds)}</span>
+            <span data-label="Avg pace">${pace(activity.moving_time_seconds, activity.distance_km)}</span>
+            <span data-label="Elapsed">${duration(activity.elapsed_time_seconds)}</span>
+            <span data-label="Visibility">${escapeHtml(visibilityLabel(activity))}</span>
+            <span data-label="Manual">${activity.is_manual ? "Yes" : "No"}</span>
+            <span data-label="Validation">${link}</span>
           </div>
         `;
       }).join("")
@@ -878,7 +889,22 @@ function renderActivities(data) {
           ${runnerIdentity(runner, { showMeta: false })}
           <span class="activity-meta">${text(runner.total_runs, "0")} runs · ${km(runner.total_distance_km)}</span>
         </summary>
-        <div class="activity-items">${rows}</div>
+        <div class="activity-items">
+          ${activities.length ? `
+            <div class="activity-row activity-row-header" aria-hidden="true">
+              <span>Date</span>
+              <span>Activity</span>
+              <span>Distance</span>
+              <span>Moving</span>
+              <span>Avg pace</span>
+              <span>Elapsed</span>
+              <span>Visibility</span>
+              <span>Manual</span>
+              <span>Link</span>
+            </div>
+          ` : ""}
+          ${rows}
+        </div>
       </details>
     `;
   }).join("");
