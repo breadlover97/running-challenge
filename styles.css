@@ -351,15 +351,8 @@ main {
 }
 
 .team-chart-metric span::before {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--team-a);
-  content: "";
-}
-
-.team-chart-metric.team-b span::before {
-  background: var(--team-b);
+  display: none;
+  content: none;
 }
 
 .team-chart-metric strong {
@@ -1320,8 +1313,18 @@ code {
 }
 
 @media (max-width: 640px) {
+  html,
   body {
-    background: #fff;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    background: #faf9f7;
+  }
+
+  html {
+    scroll-padding-top: 126px;
   }
 
   .top-nav {
@@ -1365,6 +1368,23 @@ code {
     white-space: nowrap;
   }
 
+  .nav-tabs {
+    width: 100%;
+    padding: 4px;
+    border-radius: 14px;
+    scrollbar-width: none;
+  }
+
+  .nav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-tabs a {
+    min-height: 30px;
+    padding: 6px 10px;
+    font-size: 0.72rem;
+  }
+
   h1 {
     font-size: clamp(2.4rem, 13vw, 3.7rem);
   }
@@ -1379,24 +1399,83 @@ code {
   }
 
   main {
-    width: min(100% - 20px, 1180px);
-    margin-top: 14px;
+    width: min(100% - 16px, 1180px);
+    margin-top: 10px;
   }
 
   .team-summary {
     grid-template-columns: 1fr;
+    margin-bottom: 12px;
   }
 
   .chart-card-head {
     display: grid;
+    gap: 12px;
   }
 
   .team-chart-metrics {
-    justify-content: start;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    max-width: none;
+    justify-content: stretch;
   }
 
   .team-chart-metric {
-    min-width: min(252px, 100%);
+    min-width: 0;
+    gap: 7px;
+    padding: 11px 12px;
+    border-radius: 12px;
+  }
+
+  .team-chart-metric-head {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .team-chart-metric span {
+    min-width: 0;
+    font-size: 0.66rem;
+    white-space: nowrap;
+  }
+
+  .team-chart-metric-head small {
+    flex: 0 0 auto;
+    font-size: 0.66rem;
+  }
+
+  .team-card .team-chart-metric strong {
+    font-size: 1.22rem;
+  }
+
+  .team-chart svg {
+    height: 210px;
+  }
+
+  .chart-label,
+  .chart-today-label {
+    font-size: 0.72rem;
+  }
+
+  .chart-line {
+    stroke-width: 4.4;
+  }
+
+  .chart-tooltip {
+    min-width: 136px;
+    padding: 8px 10px;
+    border-radius: 10px;
+  }
+
+  .chart-tooltip span {
+    font-size: 0.76rem;
+  }
+
+  .chart-tooltip strong {
+    font-size: 0.9rem;
   }
 
   .insights-grid {
@@ -1413,106 +1492,66 @@ code {
   }
 
   .team-card {
-    min-height: 286px;
+    min-height: 0;
+    padding: 16px;
+  }
+
+  .team-card,
+  .panel,
+  .info-section {
+    border-radius: 14px;
+    box-shadow: 0 10px 26px rgba(5, 5, 5, 0.06);
   }
 
   .panel,
   .info-section {
-    border-radius: 16px;
-    padding: 18px;
+    margin-top: 12px;
+    padding: 16px;
   }
 
-  .leaderboard-table {
-    min-width: 0;
+  .section-heading {
+    margin-bottom: 14px;
   }
 
-  .leaderboard-table thead {
-    display: none;
+  .section-heading h2 {
+    font-size: 1.24rem;
   }
 
-  .leaderboard-table,
-  .leaderboard-table tbody,
-  .leaderboard-table tr,
-  .leaderboard-table td {
-    display: block;
-    width: 100%;
-  }
-
-  .leaderboard-table tr {
-    padding: 14px 0;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .leaderboard-table tr:last-child {
-    border-bottom: 0;
-  }
-
-  .leaderboard-table td {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 8px 0;
-    border-bottom: 0;
-    text-align: right;
-  }
-
-  .leaderboard-table td::before {
-    flex: 0 0 auto;
-    color: var(--muted);
-    content: attr(data-label);
-    font-size: 0.72rem;
-    font-weight: 900;
-    text-align: left;
-    text-transform: uppercase;
-  }
-
-  .activity-card summary {
-    align-items: flex-start;
-  }
-
-  .activity-row {
-    grid-template-columns: 1fr;
-    gap: 5px;
-    min-width: 0;
-  }
-
-  .activity-row-header {
-    display: none;
-  }
-
-  .activity-row > span,
-  .activity-row > strong {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    text-align: right;
-  }
-
-  .activity-row > span::before,
-  .activity-row > strong::before {
-    flex: 0 0 auto;
-    color: var(--muted);
-    content: attr(data-label);
-    font-size: 0.68rem;
-    font-weight: 900;
-    text-align: left;
-    text-transform: uppercase;
+  .section-heading p {
+    font-size: 0.84rem;
   }
 
   .team-runner-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 10px;
+  }
+
+  .team-runner-row .contribution-meter {
+    grid-column: 1 / -1;
+    order: 3;
   }
 
   .runner-identity {
     max-width: 100%;
   }
 
-  .activity-title {
-    white-space: normal;
-  }
-
   .site-footer {
     display: block;
     padding: 24px 18px;
+  }
+}
+
+@media (max-width: 380px) {
+  .chart-label,
+  .chart-today-label {
+    font-size: 0.68rem;
+  }
+
+  .chart-tooltip span {
+    font-size: 0.72rem;
+  }
+
+  .chart-tooltip strong {
+    font-size: 0.86rem;
   }
 }
