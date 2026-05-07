@@ -1327,21 +1327,32 @@ code {
 
   body {
     background: #faf9f7;
+    padding-top: 94px;
+  }
+
+  body:has(.nav-tabs) {
+    padding-top: 132px;
   }
 
   html {
-    scroll-padding-top: 126px;
+    scroll-padding-top: 146px;
   }
 
   .top-nav {
-    position: sticky;
+    position: fixed;
     top: 0;
+    right: 0;
+    left: 0;
     width: 100%;
     min-height: 66px;
     gap: 8px;
     padding: 8px 12px;
     align-items: start;
     z-index: 40;
+  }
+
+  .anchor-section {
+    scroll-margin-top: 146px;
   }
 
   .nav-actions {
