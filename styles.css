@@ -920,8 +920,7 @@ code {
   color: var(--orange);
 }
 
-.meta-pill,
-.validation-pill {
+.meta-pill {
   display: inline-flex;
   align-items: center;
   min-height: 32px;
@@ -932,12 +931,6 @@ code {
   color: var(--ink);
   font-size: 0.82rem;
   font-weight: 800;
-}
-
-.validation-pill {
-  border-color: rgba(252, 76, 2, 0.28);
-  background: var(--orange-soft);
-  color: var(--orange-dark);
 }
 
 .meta-pill.team-a {

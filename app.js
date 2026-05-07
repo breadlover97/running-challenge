@@ -577,23 +577,19 @@ function renderLeaderboard(data) {
   const body = document.getElementById("leaderboardBody");
   const empty = document.getElementById("emptyState");
   const leaderboard = data.leaderboard || [];
+  const timing = challengeTiming(data.challenge);
 
   body.innerHTML = leaderboard.map((runner) => {
-    const latestUrl = safeUrl(runner.activities?.[0]?.strava_activity_url);
-    const validation = latestUrl
-      ? `<a class="validation-pill" href="${latestUrl}" target="_blank" rel="noreferrer">Latest run</a>`
-      : `<span class="validation-pill">No link</span>`;
-
     return `
       <tr>
         <td data-label="Rank"><span class="rank-cell">#${runner.rank} ${rankChange(runner.rank_change)}</span></td>
         <td data-label="Runner">${runnerIdentity(runner, { showMeta: false })}</td>
         <td data-label="Team"><span class="meta-pill ${teamClass(runner.team)}">${escapeHtml(teamName(runner.team))}</span></td>
         <td data-label="Distance"><strong>${km(runner.total_distance_km)}</strong></td>
-        <td data-label="Today">${km(runner.distance_added_today_km)}</td>
+        <td data-label="Avg Pace">${pace(runnerMovingSeconds(runner), runner.total_distance_km)}</td>
+        <td data-label="Avg Weekly Mileage">${km(runnerAverageWeeklyMileage(runner, timing))}</td>
         <td data-label="Runs">${text(runner.total_runs, "0")}</td>
         <td data-label="Last Run">${prettyDate(runner.latest_activity_date)}</td>
-        <td data-label="Validation">${validation}</td>
       </tr>
     `;
   }).join("");
@@ -672,6 +668,11 @@ function averageWeeklyMileagePerRunner(team, timing) {
   return (Number(team.total_distance_km || 0) / runnerCount / timing.currentDay) * 7;
 }
 
+function runnerAverageWeeklyMileage(runner, timing) {
+  if (!timing || timing.currentDay <= 0) return 0;
+  return (Number(runner.total_distance_km || 0) / timing.currentDay) * 7;
+}
+
 function teamMovingSeconds(data, team) {
   return (data.leaderboard || [])
     .filter((runner) => teamName(runner.team) === team)
@@ -739,9 +740,9 @@ function activeRunnersThisWeek(leaderboard, timing, team) {
     })).length;
 }
 
-function fastestRunnerByAveragePace(leaderboard, team) {
+function fastestRunnerByAveragePace(leaderboard, team = "") {
   return leaderboard
-    .filter((runner) => teamName(runner.team) === team)
+    .filter((runner) => !team || teamName(runner.team) === team)
     .map((runner) => {
       const movingSeconds = runnerMovingSeconds(runner);
       const secondsPerKm = paceSecondsPerKm(movingSeconds, runner.total_distance_km);
@@ -785,6 +786,7 @@ function renderInsights(data) {
   const bestTeamDayB = biggestTeamDayForTeam(data, "Team B");
   const fastestA = fastestRunnerByAveragePace(leaderboard, "Team A");
   const fastestB = fastestRunnerByAveragePace(leaderboard, "Team B");
+  const fastestRunner = fastestRunnerByAveragePace(leaderboard);
   const activeA = activeRunnersThisWeek(leaderboard, timing, "Team A");
   const activeB = activeRunnersThisWeek(leaderboard, timing, "Team B");
   const totalDistance = leaderboard.reduce((sum, runner) => sum + Number(runner.total_distance_km || 0), 0);
@@ -800,17 +802,17 @@ function renderInsights(data) {
       ],
       [
         {
-          label: "Average weekly mileage",
+          label: "Avg Weekly Mileage",
           teamA: { value: `${km(weeklyAverageA)} / runner`, note: `Projected finish: ${km(projectedA)}` },
           teamB: { value: `${km(weeklyAverageB)} / runner`, note: `Projected finish: ${km(projectedB)}` },
         },
         {
-          label: "Average pace",
+          label: "Avg Pace",
           teamA: { value: pace(teamAMovingSeconds, teamADistance), note: `${km(teamADistance)} counted` },
           teamB: { value: pace(teamBMovingSeconds, teamBDistance), note: `${km(teamBDistance)} counted` },
         },
         {
-          label: "Top pace runner",
+          label: "Fastest runner",
           teamA: {
             value: fastestA ? pace(fastestA.movingSeconds, fastestA.runner.total_distance_km) : "-",
             note: fastestA ? fastestA.runner.display_name : "No runs yet",
@@ -847,6 +849,9 @@ function renderInsights(data) {
     topRunner
       ? insightCard("Top runner", topRunner.display_name, `${km(topRunner.total_distance_km)} across ${topRunner.total_runs} runs`)
       : insightCard("Top runner", "No runs yet", "The leaderboard will update after the first Strava sync."),
+    fastestRunner
+      ? insightCard("Fastest runner", fastestRunner.runner.display_name, `${pace(fastestRunner.movingSeconds, fastestRunner.runner.total_distance_km)} across ${km(fastestRunner.runner.total_distance_km)}`)
+      : insightCard("Fastest runner", "No runs yet", "Avg Pace will appear after activities sync."),
     mostConsistent
       ? insightCard(
         "Most consistent",
@@ -885,7 +890,7 @@ function renderActivities(data) {
             <span data-label="Activity" class="activity-title" title="${escapeAttr(activity.activity_name)}">${escapeHtml(activity.activity_name)}</span>
             <strong data-label="Distance">${km(activity.distance_km)}</strong>
             <span data-label="Moving time">${duration(activity.moving_time_seconds)}</span>
-            <span data-label="Avg pace">${pace(activity.moving_time_seconds, activity.distance_km)}</span>
+            <span data-label="Avg Pace">${pace(activity.moving_time_seconds, activity.distance_km)}</span>
             <span data-label="Elapsed">${duration(activity.elapsed_time_seconds)}</span>
             <span data-label="Visibility">${escapeHtml(visibilityLabel(activity))}</span>
             <span data-label="Manual">${activity.is_manual ? "Yes" : "No"}</span>
@@ -908,7 +913,7 @@ function renderActivities(data) {
               <span>Activity</span>
               <span>Distance</span>
               <span>Moving</span>
-              <span>Avg pace</span>
+              <span>Avg Pace</span>
               <span>Elapsed</span>
               <span>Visibility</span>
               <span>Manual</span>

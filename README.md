@@ -201,7 +201,7 @@ Open `http://localhost:8000`.
 ## Privacy Notes
 
 - Participants should consent before joining.
-- The public site shows names, teams, profile photos or initials, mileage totals, run counts, average pace, and Strava validation links.
+- The public site shows names, teams, profile photos or initials, mileage totals, run counts, Avg Pace, and Strava validation links.
 - Telegram may mention daily mileage and leaderboard rank.
 - A participant can leave by asking the organiser to run the remove-participant workflow.
 - Removed public data may still exist in public git history unless repository history is rewritten, so keep the public JSON limited to challenge-safe fields.
