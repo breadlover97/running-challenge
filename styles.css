@@ -959,7 +959,9 @@ code {
 }
 
 .insight-card {
+  min-width: 0;
   min-height: 154px;
+  box-sizing: border-box;
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -991,6 +993,7 @@ code {
 
 .insight-board-card {
   grid-column: 1 / -1;
+  overflow: hidden;
 }
 
 .insight-board-head {
@@ -1048,6 +1051,7 @@ code {
 
 .insight-board {
   display: grid;
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 14px;
 }
@@ -1083,10 +1087,12 @@ code {
 }
 
 .insight-board-value strong {
+  overflow-wrap: anywhere;
   font-size: 1rem;
 }
 
 .insight-board-value small {
+  overflow-wrap: anywhere;
   color: var(--muted);
   font-size: 0.74rem;
   font-weight: 800;
@@ -1482,13 +1488,63 @@ code {
     grid-template-columns: 1fr;
   }
 
-  .insight-board-head,
-  .insight-board-row {
-    grid-template-columns: minmax(110px, 0.9fr) repeat(2, minmax(96px, 1fr));
+  .insight-card {
+    min-height: 0;
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .insight-board-head {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .insight-board-head > div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .insight-board-team {
+    min-width: 0;
+    padding: 9px 10px;
+  }
+
+  .insight-board-team strong {
+    font-size: 0.98rem;
+  }
+
+  .insight-board {
+    border-radius: 12px;
   }
 
   .insight-board-row {
+    grid-template-columns: 1fr;
     gap: 8px;
+    padding: 12px;
+  }
+
+  .insight-board-row > span {
+    font-size: 0.72rem;
+  }
+
+  .insight-board-value {
+    gap: 2px;
+    padding: 10px;
+    border-radius: 10px;
+    background: var(--team-a-soft);
+  }
+
+  .insight-board-value:nth-child(3) {
+    background: var(--team-b-soft);
+  }
+
+  .insight-board-value strong {
+    font-size: 0.96rem;
+  }
+
+  .insight-board-value small {
+    font-size: 0.72rem;
   }
 
   .team-card {
