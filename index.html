@@ -29,7 +29,10 @@
       <section id="teams" class="team-summary anchor-section" aria-label="Team totals">
         <div class="team-card team-chart-card">
           <div class="chart-card-head">
-            <h2 class="chart-title">Cumulative mileage</h2>
+            <div class="chart-title-block">
+              <h2 class="chart-title">Cumulative mileage</h2>
+              <p id="syncStatus" class="chart-sync-status">Reading latest challenge data...</p>
+            </div>
             <div id="teamChartMetrics" class="team-chart-metrics" aria-label="Team mileage totals"></div>
           </div>
           <div id="teamComparisonChart" class="team-chart team-comparison-chart" aria-label="Team cumulative mileage"></div>
@@ -47,7 +50,7 @@
       <section id="leaderboard" class="panel anchor-section">
         <div class="section-heading">
           <h2>Leaderboard</h2>
-          <p id="syncStatus">Reading latest challenge data...</p>
+          <p>Ranked by total challenge distance, with Avg Pace and Avg Weekly Mileage for each runner.</p>
         </div>
         <div class="table-wrap">
           <table class="leaderboard-table">
