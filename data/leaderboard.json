@@ -6,22 +6,22 @@
     "timezone": "Asia/Singapore",
     "website_url": "https://breadlover97.github.io/running-challenge/"
   },
-  "generated_at": "2026-05-06T07:55:40+08:00",
+  "generated_at": "2026-05-07T21:07:28+08:00",
   "team_summary": {
     "Team A": {
       "team": "Team A",
-      "total_distance_km": 22.0,
-      "total_runs": 2,
+      "total_distance_km": 32.5,
+      "total_runs": 3,
       "participant_count": 1,
       "participants": [
         {
           "rank": 1,
-          "display_name": "Ngim Tai Zhi",
-          "total_distance_km": 22.0,
+          "display_name": "Tai Zhi",
+          "total_distance_km": 32.5,
           "profile_image_url": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/17712235/5686641/42/medium.jpg",
           "distance_added_today_km": 0.0,
-          "total_runs": 2,
-          "latest_activity_date": "2026-05-05"
+          "total_runs": 3,
+          "latest_activity_date": "2026-05-06"
         }
       ]
     },
@@ -38,16 +38,17 @@
       "rank": 1,
       "rank_change": 0,
       "athlete_id": "17712235",
-      "display_name": "Ngim Tai Zhi",
+      "display_name": "Tai Zhi",
       "team": "Team A",
       "profile_image_url": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/17712235/5686641/42/medium.jpg",
-      "total_distance_km": 22.0,
+      "total_distance_km": 32.5,
       "distance_added_today_km": 0.0,
-      "total_runs": 2,
-      "latest_activity_date": "2026-05-05",
+      "total_runs": 3,
+      "latest_activity_date": "2026-05-06",
       "daily_distance_km": {
         "2026-05-04": 10.8,
-        "2026-05-05": 11.2
+        "2026-05-05": 11.2,
+        "2026-05-06": 10.5
       },
       "longest_run": {
         "date": "2026-05-05",
@@ -55,8 +56,21 @@
         "distance_km": 11.2,
         "strava_activity_url": "https://www.strava.com/activities/18386530082"
       },
-      "last_synced_at": "2026-05-06T07:55:40+08:00",
+      "last_synced_at": "2026-05-07T21:07:28+08:00",
       "activities": [
+        {
+          "activity_id": "18398683988",
+          "date": "2026-05-06",
+          "activity_name": "RD 10k 7.30",
+          "distance_km": 10.5,
+          "moving_time_seconds": 4672,
+          "elapsed_time_seconds": 4813,
+          "team": "Team A",
+          "is_manual": false,
+          "strava_activity_url": "https://www.strava.com/activities/18398683988",
+          "visibility": "everyone",
+          "is_private": false
+        },
         {
           "activity_id": "18386530082",
           "date": "2026-05-05",
@@ -88,10 +102,23 @@
   ],
   "participants": {
     "17712235": {
-      "display_name": "Ngim Tai Zhi",
+      "display_name": "Tai Zhi",
       "team": "Team A",
       "profile_image_url": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/17712235/5686641/42/medium.jpg",
       "activities": [
+        {
+          "activity_id": "18398683988",
+          "date": "2026-05-06",
+          "activity_name": "RD 10k 7.30",
+          "distance_km": 10.5,
+          "moving_time_seconds": 4672,
+          "elapsed_time_seconds": 4813,
+          "team": "Team A",
+          "is_manual": false,
+          "strava_activity_url": "https://www.strava.com/activities/18398683988",
+          "visibility": "everyone",
+          "is_private": false
+        },
         {
           "activity_id": "18386530082",
           "date": "2026-05-05",
@@ -122,7 +149,7 @@
     }
   },
   "daily_summary": {
-    "date": "2026-05-06",
+    "date": "2026-05-07",
     "total_distance_km": 0.0,
     "total_runs": 0,
     "runners": [],
@@ -130,7 +157,7 @@
   },
   "validation_summary": {
     "source": "Strava API",
-    "included_activities": 2,
+    "included_activities": 3,
     "excluded_manual_activities": 0,
     "excluded_non_run_activities": 0,
     "excluded_out_of_range_activities": 0,
