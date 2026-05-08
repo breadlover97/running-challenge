@@ -6,7 +6,7 @@
     "timezone": "Asia/Singapore",
     "website_url": "https://breadlover97.github.io/running-challenge/"
   },
-  "generated_at": "2026-05-08T01:48:29+08:00",
+  "generated_at": "2026-05-09T01:18:08+08:00",
   "team_summary": {
     "Team A": {
       "team": "Team A",
@@ -57,7 +57,7 @@
         "distance_km": 11.2,
         "strava_activity_url": "https://www.strava.com/activities/18386530082"
       },
-      "last_synced_at": "2026-05-08T01:48:29+08:00",
+      "last_synced_at": "2026-05-09T01:18:08+08:00",
       "activities": [
         {
           "activity_id": "18413768594",
@@ -176,7 +176,7 @@
     }
   },
   "daily_summary": {
-    "date": "2026-05-08",
+    "date": "2026-05-09",
     "total_distance_km": 0.0,
     "total_runs": 0,
     "runners": [],
