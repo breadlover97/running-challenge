@@ -14,6 +14,7 @@ Garmin / Apple Watch / Strava App
   -> GitHub Actions
   -> data/leaderboard.json
   -> GitHub Pages + Telegram
+  -> data/telegram_state.json
 ```
 
 ## What Counts
@@ -33,7 +34,7 @@ Garmin / Apple Watch / Strava App
 - Leaderboard, team contribution breakdown, insights, and activity validation table.
 - One-step Strava signup through Cloudflare Workers.
 - GitHub Actions workflows for daily sync, participant join, team updates, and removals.
-- Telegram daily update generated from the same `data/leaderboard.json` used by the website.
+- Telegram daily update generated from the same `data/leaderboard.json` used by the website, compared against `data/telegram_state.json` so the message shows mileage since the last successful Telegram update.
 
 ## Repository Map
 
@@ -45,7 +46,8 @@ running-challenge/
 ├── styles.css                    # Shared site styling
 ├── app.js                        # Browser rendering logic
 ├── data/
-│   └── leaderboard.json          # Public generated dashboard data
+│   ├── leaderboard.json          # Public generated dashboard data
+│   └── telegram_state.json       # Last successful Telegram update snapshot
 ├── scripts/
 │   ├── fetch_strava.py           # Strava API fetch and sanitisation
 │   ├── build_leaderboard.py      # Leaderboard and team aggregation
@@ -130,7 +132,7 @@ Use least-privilege tokens where possible. Rotate secrets if they are pasted out
 
 ## Workflows
 
-- [Daily 2026 Run Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml): runs at **11:59 pm SGT**, fetches Strava runs, rebuilds `data/leaderboard.json`, sends Telegram, and commits public data.
+- [Daily 2026 Run Challenge Update](https://github.com/breadlover97/running-challenge/actions/workflows/daily_update.yml): runs at **11:59 pm SGT**, fetches Strava runs, rebuilds `data/leaderboard.json`, sends Telegram, updates `data/telegram_state.json`, and commits public data.
 - [Add Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/add_participant.yml): exchanges a one-time Strava code, updates private participant config, and refreshes the leaderboard.
 - [Update Participant Team](https://github.com/breadlover97/running-challenge/actions/workflows/update_team.yml): changes Team A/B assignment and refreshes the leaderboard.
 - [Remove Strava Participant](https://github.com/breadlover97/running-challenge/actions/workflows/remove_participant.yml): removes a participant token and refreshes the public JSON.

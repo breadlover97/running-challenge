@@ -8,7 +8,7 @@ import html
 import json
 import os
 import sys
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -17,12 +17,25 @@ import requests
 
 TELEGRAM_API_URL = "https://api.telegram.org/bot{token}/sendMessage"
 MAX_LEADERBOARD_ROWS = 12
-MAX_TODAY_ROWS = 8
+MAX_RECENT_ROWS = 8
 
 
 def load_json(path: Path) -> dict[str, Any]:
     with open(path, "r", encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def load_optional_json(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    return load_json(path)
+
+
+def write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(payload, handle, indent=2, ensure_ascii=False)
+        handle.write("\n")
 
 
 def require_env(name: str) -> str:
@@ -46,15 +59,87 @@ def fmt_km(value: Any) -> str:
     return f"{float(value or 0):.1f}km"
 
 
+def one_decimal(value: Any) -> float:
+    return round(float(value or 0), 1)
+
+
 def e(value: Any) -> str:
     return html.escape(str(value), quote=True)
 
 
-def build_message(data: dict[str, Any]) -> str:
+def runner_key(row: dict[str, Any]) -> str:
+    return str(row.get("athlete_id") or row.get("display_name") or "")
+
+
+def previous_runner_map(previous: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {
+        runner_key(row): row
+        for row in previous.get("leaderboard", [])
+        if runner_key(row)
+    }
+
+
+def activity_ids(row: dict[str, Any]) -> set[str]:
+    ids = set(row.get("activity_ids", []))
+    ids.update(str(activity.get("activity_id")) for activity in row.get("activities", []) if activity.get("activity_id"))
+    return ids
+
+
+def distance_since_last_update(row: dict[str, Any], previous_by_runner: dict[str, dict[str, Any]]) -> float:
+    previous = previous_by_runner.get(runner_key(row), {})
+    return one_decimal(float(row.get("total_distance_km") or 0) - float(previous.get("total_distance_km") or 0))
+
+
+def runners_since_last_update(data: dict[str, Any], previous: dict[str, Any]) -> list[dict[str, Any]]:
+    previous_by_runner = previous_runner_map(previous)
+    rows = []
+    for row in data.get("leaderboard", []):
+        previous = previous_by_runner.get(runner_key(row), {})
+        previous_ids = activity_ids(previous)
+        recent_activities = [
+            activity
+            for activity in row.get("activities", [])
+            if str(activity.get("activity_id") or "") not in previous_ids
+        ]
+        distance_delta = distance_since_last_update(row, previous_by_runner)
+        if distance_delta <= 0 and not recent_activities:
+            continue
+        rows.append(
+            {
+                "display_name": row.get("display_name", "Runner"),
+                "team": row.get("team", "Team A"),
+                "distance_km": max(distance_delta, 0.0),
+                "run_count": len(recent_activities),
+            }
+        )
+    rows.sort(key=lambda item: (-item["distance_km"], item["display_name"].lower()))
+    return rows
+
+
+def build_state(data: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "sent_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "leaderboard_generated_at": data.get("generated_at"),
+        "leaderboard": [
+            {
+                "athlete_id": row.get("athlete_id"),
+                "display_name": row.get("display_name"),
+                "team": row.get("team"),
+                "total_distance_km": row.get("total_distance_km"),
+                "activity_ids": sorted(activity_ids(row)),
+            }
+            for row in data.get("leaderboard", [])
+        ],
+    }
+
+
+def build_message(data: dict[str, Any], previous: dict[str, Any] | None = None) -> str:
     challenge = data.get("challenge", {})
     leaderboard = data.get("leaderboard", [])
     daily = data.get("daily_summary", {})
     website_url = challenge.get("website_url") or ""
+    previous_by_runner = previous_runner_map(previous or {})
+    recent_runners = runners_since_last_update(data, previous or {})
 
     lines = [
         f"🏃 <b>{e(challenge.get('name', '2026 Run Challenge'))} Daily Update</b>",
@@ -78,36 +163,38 @@ def build_message(data: dict[str, Any]) -> str:
 
     if leaderboard:
         for row in leaderboard[:MAX_LEADERBOARD_ROWS]:
+            distance_delta = distance_since_last_update(row, previous_by_runner)
             lines.append(
                 f"{row.get('rank')}. {e(row.get('display_name', 'Runner'))} "
                 f"({e(row.get('team', 'Team A'))}) - "
                 f"{fmt_km(row.get('total_distance_km'))} "
-                f"(+{fmt_km(row.get('distance_added_today_km'))} today)"
+                f"(+{fmt_km(max(distance_delta, 0.0))} since last update)"
             )
         if len(leaderboard) > MAX_LEADERBOARD_ROWS:
             lines.append(f"...and {len(leaderboard) - MAX_LEADERBOARD_ROWS} more")
     else:
         lines.append("No runs have been logged yet.")
 
-    biggest_mover = daily.get("biggest_mover")
+    biggest_mover = recent_runners[0] if recent_runners else None
     if biggest_mover:
         lines.extend(
             [
                 "",
                 "<b>Biggest mover:</b>",
-                f"{e(biggest_mover.get('display_name', 'Runner'))} added {fmt_km(biggest_mover.get('distance_km'))} today.",
+                f"{e(biggest_mover.get('display_name', 'Runner'))} added {fmt_km(biggest_mover.get('distance_km'))} since last update.",
             ]
         )
 
-    todays_runs = daily.get("runners", [])
-    lines.extend(["", "<b>Today's runs:</b>"])
-    if todays_runs:
-        for runner in todays_runs[:MAX_TODAY_ROWS]:
-            lines.append(f"- {e(runner.get('display_name', 'Runner'))}: {fmt_km(runner.get('distance_km'))}")
-        if len(todays_runs) > MAX_TODAY_ROWS:
-            lines.append(f"- Plus {len(todays_runs) - MAX_TODAY_ROWS} more runner(s)")
+    lines.extend(["", "<b>Runs since last update:</b>"])
+    if recent_runners:
+        for runner in recent_runners[:MAX_RECENT_ROWS]:
+            run_count = int(runner.get("run_count") or 0)
+            run_text = f" across {run_count} run{'s' if run_count != 1 else ''}" if run_count else ""
+            lines.append(f"- {e(runner.get('display_name', 'Runner'))}: {fmt_km(runner.get('distance_km'))}{run_text}")
+        if len(recent_runners) > MAX_RECENT_ROWS:
+            lines.append(f"- Plus {len(recent_runners) - MAX_RECENT_ROWS} more runner(s)")
     else:
-        lines.append("No new runs logged today.")
+        lines.append("No new runs logged since the last update.")
 
     if website_url:
         lines.extend(["", "<b>Full leaderboard:</b>", e(website_url)])
@@ -140,12 +227,16 @@ def send_message(token: str, chat_id: str, message: str) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Send the daily Telegram update.")
     parser.add_argument("--leaderboard", default="data/leaderboard.json", help="Path to public leaderboard JSON")
+    parser.add_argument("--state", default="data/telegram_state.json", help="Path to last successful Telegram update state")
+    parser.add_argument("--write-state", action="store_true", help="Update the state file after a successful send")
     parser.add_argument("--dry-run", action="store_true", help="Print the message without sending it")
     args = parser.parse_args()
 
     try:
         data = load_json(Path(args.leaderboard))
-        message = build_message(data)
+        state_path = Path(args.state)
+        previous = load_optional_json(state_path)
+        message = build_message(data, previous)
         if args.dry_run:
             print(message)
             return 0
@@ -153,6 +244,8 @@ def main() -> int:
         token = require_env("TELEGRAM_BOT_TOKEN")
         chat_id = require_env("TELEGRAM_CHAT_ID")
         send_message(token, chat_id, message)
+        if args.write_state:
+            write_json(state_path, build_state(data))
         print("Telegram daily update sent.")
         return 0
     except (OSError, json.JSONDecodeError, RuntimeError, requests.RequestException) as exc:

@@ -34,7 +34,7 @@
           <div class="flow-step"><strong>2</strong><span>The participant signs in once through the Cloudflare Worker and grants Strava API access.</span></div>
           <div class="flow-step"><strong>3</strong><span>The Worker receives the Strava callback and triggers the GitHub Actions add-participant workflow.</span></div>
           <div class="flow-step"><strong>4</strong><span>GitHub Actions stores private refresh tokens in repository secrets, not in the website code.</span></div>
-          <div class="flow-step"><strong>5</strong><span>The daily workflow fetches Strava runs, builds <code>data/leaderboard.json</code>, sends Telegram, and commits the public JSON.</span></div>
+          <div class="flow-step"><strong>5</strong><span>The daily workflow fetches Strava runs, builds <code>data/leaderboard.json</code>, sends Telegram, updates <code>data/telegram_state.json</code>, and commits the public JSON.</span></div>
           <div class="flow-step"><strong>6</strong><span>GitHub Pages serves the static website, and the browser reads the public JSON to render the dashboard.</span></div>
         </div>
       </section>
@@ -45,7 +45,7 @@
         <p><strong>Cloudflare Worker</strong> handles one-time signup, OAuth state protection, Strava callback handling, and GitHub workflow dispatch.</p>
         <p><strong>GitHub Actions</strong> runs the Python scripts, refreshes Strava access tokens, updates team assignments, rebuilds the leaderboard, and posts Telegram updates.</p>
         <p><strong>GitHub Pages</strong> hosts the static site. It has no backend server and no API secrets in frontend code.</p>
-        <p><strong>Telegram Bot API</strong> sends the daily group update from the same public leaderboard data used by the website.</p>
+        <p><strong>Telegram Bot API</strong> sends the daily group update from the same public leaderboard data used by the website, compared against the last successful Telegram state.</p>
       </section>
 
       <section class="info-section">
@@ -57,7 +57,8 @@
 ├── styles.css                    # Shared site styling
 ├── app.js                        # Browser rendering logic
 ├── data/
-│   └── leaderboard.json          # Public generated data
+│   ├── leaderboard.json          # Public generated data
+│   └── telegram_state.json       # Last successful Telegram update snapshot
 ├── scripts/
 │   ├── fetch_strava.py           # Strava API fetch and sanitisation
 │   ├── build_leaderboard.py      # Aggregates leaderboard/team stats
@@ -89,7 +90,7 @@
         <div class="tech-grid">
           <article>
             <h3>Daily sync</h3>
-            <p><code>daily_update.yml</code> runs at 15:59 UTC, which is 11:59 pm Singapore time. It fetches Strava runs, rebuilds <code>leaderboard.json</code>, sends Telegram, and commits the public data.</p>
+            <p><code>daily_update.yml</code> runs at 15:59 UTC, which is 11:59 pm Singapore time. It fetches Strava runs, rebuilds <code>leaderboard.json</code>, sends Telegram, updates <code>telegram_state.json</code>, and commits the public data.</p>
           </article>
           <article>
             <h3>Participant join</h3>
@@ -141,7 +142,9 @@
         </p>
         <p>
           <code>scripts/build_leaderboard.py</code> converts that activity file into <code>data/leaderboard.json</code>.
-          The website and Telegram message both read from this same JSON source.
+          The website and Telegram message both read from this same JSON source. Telegram also compares against
+          <code>data/telegram_state.json</code> so delayed workflow runs can report mileage and runs since the last
+          successful Telegram update rather than only the calendar day.
         </p>
         <pre class="code-block"><code>{
   "challenge": { "name": "2026 Run Challenge", "timezone": "Asia/Singapore" },
