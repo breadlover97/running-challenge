@@ -1,12 +1,12 @@
 {
-  "sent_at": "2026-05-20T18:17:16+00:00",
-  "leaderboard_generated_at": "2026-05-21T02:17:14+08:00",
+  "sent_at": "2026-05-21T17:59:05+00:00",
+  "leaderboard_generated_at": "2026-05-22T01:59:03+08:00",
   "leaderboard": [
     {
       "athlete_id": "17712235",
       "display_name": "Tai Zhi",
       "team": "Team A",
-      "total_distance_km": 162.4,
+      "total_distance_km": 172.6,
       "activity_ids": [
         "18373935753",
         "18386530082",
@@ -22,7 +22,8 @@
         "18536072073",
         "18553604728",
         "18568274442",
-        "18581498715"
+        "18581498715",
+        "18591984141"
       ]
     }
   ]
