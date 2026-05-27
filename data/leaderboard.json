@@ -6,22 +6,22 @@
     "timezone": "Asia/Singapore",
     "website_url": "https://breadlover97.github.io/running-challenge/"
   },
-  "generated_at": "2026-05-27T02:26:16+08:00",
+  "generated_at": "2026-05-28T02:26:30+08:00",
   "team_summary": {
     "Team A": {
       "team": "Team A",
-      "total_distance_km": 229.2,
-      "total_runs": 21,
+      "total_distance_km": 237.3,
+      "total_runs": 22,
       "participant_count": 1,
       "participants": [
         {
           "rank": 1,
           "display_name": "Tai Zhi",
-          "total_distance_km": 229.2,
+          "total_distance_km": 237.3,
           "profile_image_url": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/17712235/5686641/42/medium.jpg",
           "distance_added_today_km": 0.0,
-          "total_runs": 21,
-          "latest_activity_date": "2026-05-26"
+          "total_runs": 22,
+          "latest_activity_date": "2026-05-27"
         }
       ]
     },
@@ -41,10 +41,10 @@
       "display_name": "Tai Zhi",
       "team": "Team A",
       "profile_image_url": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/17712235/5686641/42/medium.jpg",
-      "total_distance_km": 229.2,
+      "total_distance_km": 237.3,
       "distance_added_today_km": 0.0,
-      "total_runs": 21,
-      "latest_activity_date": "2026-05-26",
+      "total_runs": 22,
+      "latest_activity_date": "2026-05-27",
       "daily_distance_km": {
         "2026-05-04": 10.8,
         "2026-05-05": 11.2,
@@ -64,7 +64,8 @@
         "2026-05-22": 5.4,
         "2026-05-23": 26.8,
         "2026-05-25": 13.3,
-        "2026-05-26": 11.0
+        "2026-05-26": 11.0,
+        "2026-05-27": 8.2
       },
       "longest_run": {
         "date": "2026-05-23",
@@ -72,8 +73,21 @@
         "distance_km": 23.1,
         "strava_activity_url": "https://www.strava.com/activities/18620849943"
       },
-      "last_synced_at": "2026-05-27T02:26:16+08:00",
+      "last_synced_at": "2026-05-28T02:26:30+08:00",
       "activities": [
+        {
+          "activity_id": "18668854553",
+          "date": "2026-05-27",
+          "activity_name": "Morning Run",
+          "distance_km": 8.2,
+          "moving_time_seconds": 3374,
+          "elapsed_time_seconds": 3821,
+          "team": "Team A",
+          "is_manual": false,
+          "strava_activity_url": "https://www.strava.com/activities/18668854553",
+          "visibility": "everyone",
+          "is_private": false
+        },
         {
           "activity_id": "18662310178",
           "date": "2026-05-26",
@@ -357,6 +371,19 @@
       "profile_image_url": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/17712235/5686641/42/medium.jpg",
       "activities": [
         {
+          "activity_id": "18668854553",
+          "date": "2026-05-27",
+          "activity_name": "Morning Run",
+          "distance_km": 8.2,
+          "moving_time_seconds": 3374,
+          "elapsed_time_seconds": 3821,
+          "team": "Team A",
+          "is_manual": false,
+          "strava_activity_url": "https://www.strava.com/activities/18668854553",
+          "visibility": "everyone",
+          "is_private": false
+        },
+        {
           "activity_id": "18662310178",
           "date": "2026-05-26",
           "activity_name": "Night Run",
@@ -633,7 +660,7 @@
     }
   },
   "daily_summary": {
-    "date": "2026-05-27",
+    "date": "2026-05-28",
     "total_distance_km": 0.0,
     "total_runs": 0,
     "runners": [],
@@ -641,7 +668,7 @@
   },
   "validation_summary": {
     "source": "Strava API",
-    "included_activities": 21,
+    "included_activities": 22,
     "excluded_manual_activities": 0,
     "excluded_non_run_activities": 0,
     "excluded_out_of_range_activities": 0,
